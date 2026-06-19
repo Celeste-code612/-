@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>馔迹简行 · 舌尖舆图 | 古籍美食档案馆</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        @font-face {
+            font-family: 'ChillLongCangKaiShu';
+            src: url('ChillLongCangKaiShu_Regular.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'ChillLongCangKaiShu';
+            src: url('ChillLongCangKaiShu_Bold.otf') format('opentype');
+            font-weight: bold;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'ChillLongCangKaiShu';
+            src: url('ChillLongCangKaiShu_ExtraBold.otf') format('opentype');
+            font-weight: 800;
+            font-style: normal;
+        }
+        :root {
+            --ink: #2c2416;
+            --ink-light: #5c4a3a;
+            --rice: #f7f0e4;
+            --rice-dark: #e8dcc8;
+            --vermilion: #c1443a;
+            --vermilion-light: #e06b5e;
+            --gold: #b8963e;
+            --gold-light: #d4b65e;
+            --jade: #6b8e6b;
+            --celadon: #b4cfb4;
+            --parchment: #f2e8d5;
+            --paper: #faf3e6;
+            --seal: #8b1a1a;
+            --text-main: #3a3022;
+            --text-sub: #6b5e4a;
+            --shadow: rgba(44,36,22,0.12);
+            --shadow-deep: rgba(44,36,22,0.25);
+            --t-slow: 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
+            --t-med: 0.4s cubic-bezier(0.25,0.46,0.45,0.94);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #1f1b12;
+            font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Scroll Indicator */
+        .scroll-indicator {
+            position: fixed;
+            top: 0; left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--vermilion), var(--gold), var(--jade));
+            z-index: 1000;
+            transition: width .1s linear;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 999;
+            padding: 0 2rem 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            background: linear-gradient(180deg, rgba(20, 16, 10, 0.85) 0%, rgba(20, 16, 10, 0.5) 100%);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 1px 15px rgba(0,0,0,0.1);
+        }
+
+        .nav-logo {
+            font-family: 'ChillLongCangKaiShu', 'Noto Serif SC', serif;
+            font-size: 1.5rem;
+            font-weight: normal;
+            color: var(--rice);
+            letter-spacing: .1em;
+            cursor: pointer;
+            text-decoration: none;
+            transition: color var(--t-med);
+            text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+        }
+        .nav-logo:hover { color: var(--gold-light); }
+        .nav-logo .logo-seal {
+            display: inline-block;
+            width: 28px; height: 28px;
+            line-height: 28px;
+            text-align: center;
+            background: var(--vermilion);
+            color: var(--rice);
+            border-radius: 2px;
+            font-size: .75rem;
+            margin-right: 6px;
+            vertical-align: middle;
+            font-weight: 700;
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 3.5rem;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: rgba(247, 240, 228, 0.8);
+            font-size: .95rem;
+            letter-spacing: .04em;
+            position: relative;
+            padding: 4px 0;
+            transition: color var(--t-med);
+        }
+        .nav-links a::after {
+            content: "";
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 0; height: 1.5px;
+            background: var(--gold-light);
+            transition: width var(--t-med);
+        }
+        .nav-links a:hover,
+        .nav-links a.active { color: var(--gold-light); }
+        .nav-links a:hover::after,
+        .nav-links a.active::after { width: 100%; }
+
+        .nav-hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 4px;
+        }
+        .nav-hamburger span {
+            display: block;
+            width: 24px; height: 2px;
+            background: var(--rice);
+            transition: var(--t-med);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+        }
+
+        .gourmet-atlas { position: relative; width: 100%; height: 100%; }
+        #gourmetMap {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+            background: #2e2a22;
+        }
+        /* 右侧美食卡片 - 支持折叠 */
+        .recipe-card-pavilion {
+            position: absolute;
+            bottom: 2rem;
+            right: 2rem;
+            width: 360px;
+            max-width: calc(100% - 2rem);
+            background: rgba(30, 25, 18, 0.92);
+            backdrop-filter: blur(14px);
+            border-radius: 2rem 2rem 2rem 1rem;
+            border: 1px solid rgba(215, 185, 110, 0.7);
+            box-shadow: 0 20px 35px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(230,200,120,0.2);
+            z-index: 20;
+            font-family: 'Noto Serif SC', serif;
+            transition: all 0.3s ease;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        /* 折叠状态下的卡片 */
+        .recipe-card-pavilion.collapsed {
+            width: auto;
+            height: auto;
+            background: rgba(30, 25, 18, 0.9);
+            backdrop-filter: blur(12px);
+            border-radius: 48px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            overflow: hidden;
+            max-height: none;
+        }
+        .recipe-card-pavilion.collapsed .card-seal,
+        .recipe-card-pavilion.collapsed .dish-name,
+        .recipe-card-pavilion.collapsed .dish-desc,
+        .recipe-card-pavilion.collapsed .dish-info,
+        .recipe-card-pavilion.collapsed .recipe-entry,
+        .recipe-card-pavilion.collapsed .card-footer-hint {
+            display: none;
+        }
+        .recipe-card-pavilion.collapsed .collapse-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #f7e5b5;
+            font-size: 1.2rem;
+        }
+        .recipe-card-pavilion .collapse-icon {
+            display: none;
+        }
+        .card-seal {
+            background: rgba(0,0,0,0.4);
+            padding: 1rem 1.5rem 0.6rem;
+            border-bottom: 1px dashed #c6aa6e;
+            display: flex;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            background: rgba(30,25,18,0.95);
+            backdrop-filter: blur(8px);
+            z-index: 1;
+        }
+        .collapse-btn {
+            background: none;
+            border: 1px solid #c6a15e;
+            border-radius: 30px;
+            width: 28px;
+            height: 28px;
+            font-size: 1rem;
+            color: #ecdba8;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .collapse-btn:hover {
+            background: #a77d3e40;
+            transform: scale(1.05);
+        }
+        .region-name { font-size: 1.4rem; font-weight: 600; color: #f7e5b5; }
+        .dish-name {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #ffefc0;
+            margin: 0.8rem 1.5rem 0.5rem;
+            border-left: 4px solid #e0a458;
+            padding-left: 1rem;
+        }
+        .dish-desc {
+            margin: 0.5rem 1.5rem 1rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #e1d2b0;
+            background: rgba(0,0,0,0.3);
+            padding: 0.6rem 1rem;
+            border-radius: 1.5rem;
+        }
+        .dish-info {
+            margin: 0.5rem 1.5rem 1rem;
+            background: rgba(0,0,0,0.3);
+            padding: 0.8rem 1rem;
+            border-radius: 1rem;
+        }
+        .info-row {
+            display: flex;
+            margin-bottom: 0.7rem;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+        .info-row:last-child { margin-bottom: 0; }
+        .info-label {
+            color: #c6aa6e;
+            font-weight: 600;
+            min-width: 70px;
+            flex-shrink: 0;
+        }
+        .info-value { color: #e1d2b0; }
+        .recipe-entry { margin: 0 1.5rem 1.2rem; }
+        .btn-recipe {
+            width: 100%;
+            background: #c99448;
+            border: none;
+            font-family: inherit;
+            font-weight: 600;
+            padding: 10px 0;
+            border-radius: 40px;
+            color: #261f12;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-recipe:hover {
+            background: #e2ac64;
+            transform: translateY(-2px);
+        }
+        .card-footer-hint {
+            font-size: 0.65rem;
+            text-align: center;
+            padding: 0.5rem 1rem 1rem;
+            color: #bc9a60;
+            border-top: 1px solid rgba(200,165,85,0.4);
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+        .locate-trigger {
+            background: none;
+            border: 1px solid #c6a15e;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            color: #ecdba8;
+            cursor: pointer;
+        }
+        .locate-trigger:hover { background: #a77d3e40; }
+        .atlas-header {
+            position: absolute;
+            top: 80px;
+            left: 1.5rem;
+            z-index: 20;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            padding: 0.4rem 1.2rem;
+            border-radius: 2rem;
+            border-left: 3px solid #e5bc74;
+            pointer-events: none;
+        }
+        .atlas-header h1 { font-size: 1.5rem; color: #f7e9cf; letter-spacing: 2px; }
+        .region-nav {
+            position: absolute;
+            top: 80px;
+            right: 1.2rem;
+            z-index: 25;
+            background: rgba(20,18,12,0.75);
+            backdrop-filter: blur(10px);
+            border-radius: 48px;
+            padding: 0.4rem 1rem;
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            border: 1px solid #a7864e;
+        }
+        .region-btn {
+            background: transparent;
+            border: 1px solid #ddb76b;
+            color: #fbefcf;
+            font-family: inherit;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.8rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .region-btn:hover, .region-btn.active {
+            background: #c99448;
+            color: #1f170c;
+            border-color: #efcf8a;
+        }
+        .inscription-note {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            z-index: 20;
+            background: rgba(0,0,0,0.4);
+            border-radius: 30px;
+            padding: 0.2rem 1rem;
+            font-size: 0.7rem;
+            color: #cdba88;
+            pointer-events: none;
+        }
+        /* 模态框 */
+        .scroll-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(6px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+        .scroll-modal.active { visibility: visible; opacity: 1; }
+        .modal-scroll-content {
+            max-width: 520px;
+            width: 85%;
+            background: #fef5e3;
+            border-radius: 2rem 0.5rem 2rem 0.5rem;
+            border: 1px solid #e5c892;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-title {
+            background: #ddc28c;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            border-radius: 2rem 0.5rem 0 0;
+        }
+        .close-modal-x {
+            font-size: 2rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+        .modal-recipe-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            color: #3b2c1a;
+        }
+        .custom-marker-icon {
+            background: #846d47;
+            width: 28px;
+            height: 28px;
+            transform: rotate(-45deg);
+            border: 1px solid #efcd8a;
+            border-radius: 50% 50% 50% 0;
+            cursor: pointer;
+        }
+        .custom-marker-icon div {
+            width: 12px;
+            height: 12px;
+            background: #ffefb0;
+            border-radius: 50%;
+            margin: 6px auto 0;
+            transform: rotate(45deg);
+        }
+        /* 调整Leaflet地图控件位置 */
+        .leaflet-control-zoom {
+            top: 140px !important;
+        }
+        /* 搜索功能 */
+        .search-container {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 30;
+            width: 320px;
+            max-width: calc(100% - 140px);
+        }
+        .search-box {
+            width: 100%;
+            background: rgba(20, 18, 12, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 48px;
+            padding: 0.5rem 1rem;
+            border: 1px solid #a7864e;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .search-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #f7e9cf;
+            font-family: inherit;
+            font-size: 0.9rem;
+            padding: 0.3rem 0;
+        }
+        .search-box input::placeholder {
+            color: rgba(247, 233, 207, 0.5);
+        }
+        .search-icon {
+            color: #ddb76b;
+            font-size: 1rem;
+        }
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(20, 18, 12, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            border: 1px solid #a7864e;
+            margin-top: 0.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+        .search-results.active {
+            display: block;
+        }
+        .search-result-item {
+            padding: 0.8rem 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(167, 134, 78, 0.3);
+            transition: background 0.2s;
+        }
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+        .search-result-item:hover {
+            background: rgba(201, 148, 72, 0.3);
+        }
+        .search-result-name {
+            color: #ffefc0;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .search-result-dish {
+            color: #c6aa6e;
+            font-size: 0.8rem;
+            margin-top: 0.2rem;
+        }
+        .search-no-results {
+            padding: 1rem;
+            text-align: center;
+            color: #cdba88;
+            font-size: 0.85rem;
+        }
+        @media (max-width: 700px) {
+            .atlas-header { top: 80px; }
+            .search-container {
+                top: 136px;
+                width: calc(100% - 120px);
+                max-width: none;
+            }
+            .region-nav { top: 200px; right: 0.5rem; gap: 0.4rem; }
+            .recipe-card-pavilion { width: 300px; bottom: 1rem; right: 1rem; max-height: 70vh; }
+            .dish-name { font-size: 1.3rem; }
+            .info-label { min-width: 55px; }
+            .leaflet-control-zoom { top: 200px !important; }
+        }
+        /* 响应式导航 */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .nav-hamburger { display: flex; }
+            .nav-links.open {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 64px; left: 0; right: 0;
+                background: rgba(20, 16, 10, 0.96);
+                backdrop-filter: blur(12px);
+                padding: 1.5rem 2rem;
+                gap: 1.2rem;
+                box-shadow: 0 8px 30px var(--shadow);
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Scroll Indicator -->
+<div class="scroll-indicator" id="scrollIndicator"></div>
+
+<!-- Navigation -->
+<nav class="nav" id="nav">
+    <a href="首页.html" class="nav-logo">
+        <span class="logo-seal">食</span>食简溯时
+    </a>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">首页</a></li>
+        <li><a href="芸编食简.html">芸编食简</a></li>
+        <li><a href="味脉简谱.html">味脉简谱</a></li>
+        <li><a href="馔迹简行.html" class="active">馔迹简行</a></li>
+        <li><a href="试味简录.html">试味简录</a></li>
+        <li><a href="吾味斋.html">吾味斋</a></li>
+        <li><a href="关于本简.html">关于本简</a></li>
+    </ul>
+    <button class="nav-hamburger" id="navHamburger" aria-label="菜单">
+        <span></span><span></span><span></span>
+    </button>
+</nav>
+
+<div class="gourmet-atlas">
+    <div id="gourmetMap"></div>
+    <div class="atlas-header"><h1>馔迹简行 · 舌尖舆图</h1></div>
+
+    <!-- 搜索功能 -->
+    <div class="search-container">
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="搜索地名或菜名..." autocomplete="off">
+        </div>
+        <div class="search-results" id="searchResults"></div>
+    </div>
+
+    <div class="region-nav" id="regionNavBar">
+        <button class="region-btn" data-region="north">华北</button>
+        <button class="region-btn" data-region="northeast">东北</button>
+        <button class="region-btn" data-region="east">华东</button>
+        <button class="region-btn" data-region="central">华中</button>
+        <button class="region-btn" data-region="south">华南</button>
+        <button class="region-btn" data-region="southwest">西南</button>
+        <button class="region-btn" data-region="northwest">西北</button>
+    </div>
+
+    <!-- 右侧美食卡片（带折叠功能） -->
+    <div class="recipe-card-pavilion" id="foodCardPanel">
+        <div class="card-seal">
+            <span class="region-name" id="cardRegion">临安 · 钱塘</span>
+            <button class="collapse-btn" id="collapseCardBtn" title="收起卡片">−</button>
+        </div>
+        <div class="collapse-icon">📜</div>
+        <div class="dish-name" id="cardDish">蟹生</div>
+        <div class="dish-desc" id="cardDesc">鲜香开胃，佐酒佳品</div>
+        <div class="dish-info">
+            <div class="info-row"><span class="info-label">类别</span><span class="info-value" id="cardCategory">腌制发酵</span></div>
+            <div class="info-row"><span class="info-label">食材</span><span class="info-value" id="cardIngredients">生蟹、麻油、草果、茴香、砂仁、花椒末</span></div>
+            <div class="info-row"><span class="info-label">做法</span><span class="info-value" id="cardMethod">将生蟹切碎，麻油熬熟放凉，与草果、茴香、砂仁、花椒末拌匀，加入葱盐醋调料</span></div>
+            <div class="info-row"><span class="info-label">功效</span><span class="info-value" id="cardEffect">鲜香开胃，佐酒佳品</span></div>
+        </div>
+        <div class="recipe-entry">
+            <button class="btn-recipe" id="openRecipeButton"> 开卷 · 古法食谱</button>
+        </div>
+        <div class="card-footer-hint">
+            <span class="locate-trigger" id="flyToCurrentBtn"> 舆图寻迹</span>
+            <span class="locate-trigger" id="viewFullMapBtn"> 查看全图</span>
+        </div>
+    </div>
+    <div class="inscription-note">㊟ 点击图钉或分区 · 卡片可收起 · 点击图钉自动展开</div>
+</div>
+
+<div id="recipeScrollModal" class="scroll-modal">
+    <div class="modal-scroll-content">
+        <div class="modal-title"><h3>📜 食谱 · 古馔手札</h3><button class="close-modal-x" id="closeModalBtn">&times;</button></div>
+        <div class="modal-recipe-body" id="modalRecipeDetail"></div>
+    </div>
+</div>
+
+<script>
+    // 导航栏和滚动指示器功能
+    (function() {
+        'use strict';
+
+        var si = document.getElementById('scrollIndicator');
+        function usi() {
+            var s = document.documentElement.scrollTop;
+            var h = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            si.style.width = h ? (s / h * 100) + '%' : '0%';
+        }
+
+        function un() {
+            var n = document.getElementById('nav');
+            if (n) n.classList.toggle('scrolled', window.scrollY > 40);
+        }
+
+        var t = false;
+        function os() {
+            if (!t) {
+                requestAnimationFrame(function() {
+                    usi();
+                    un();
+                    t = false;
+                });
+                t = true;
+            }
+        }
+
+        document.getElementById('navHamburger').addEventListener('click', function() {
+            document.getElementById('navLinks').classList.toggle('open');
+        });
+
+        document.querySelectorAll('.nav-links a').forEach(function(l) {
+            l.addEventListener('click', function() {
+                document.getElementById('navLinks').classList.remove('open');
+            });
+        });
+
+        window.addEventListener('scroll', os, { passive: true });
+        os();
+    })();
+
+    // 地图功能
+    (function() {
+        const cuisineData = [
+            { id: "hangzhou1", name: "临安 · 钱塘", coords: [30.2741, 120.1551], dish: "蟹生", category: "腌制发酵", ingredients: "生蟹、麻油、草果、茴香、砂仁、花椒末", method: "将生蟹切碎，麻油熬熟放凉，与草果、茴香、砂仁、花椒末拌匀，加入葱盐醋调料", effect: "鲜香开胃，佐酒佳品", region: "east" },
+            { id: "hangzhou2", name: "临安 · 钱塘", coords: [30.35, 120.25], dish: "炙鱼", category: "干制风干", ingredients: "鲚鱼、箬叶", method: "鲚鱼处理干净，炭火烤干收藏，或去头尾切段油煎，箬叶间隔盛放瓦罐泥封", effect: "保存长久，风味独特", region: "east" },
+            { id: "hangzhou3", name: "临安 · 钱塘", coords: [30.45, 120.35], dish: "炉焙鸡", category: "鲜烹热食", ingredients: "鸡肉、醋、酒", method: "鸡煮八分熟切块，油锅翻炒盖好，加醋酒盐烹煮，重复数次至酥烂", effect: "酥烂入味，补气养身", region: "east" },
+            { id: "beijing", name: "大都 · 燕京", coords: [39.9042, 116.4074], dish: "三下锅", category: "汤羹粥饭", ingredients: "羊肉、草果、良姜", method: "羊肉草果良姜熬汤过滤，羊后脚肉做丸子切小块，配胡椒盐醋调和", effect: "补益脾胃之气，增强正气", region: "north" },
+            { id: "xian", name: "长安 · 西京", coords: [34.3416, 108.9402], dish: "羊肉泡馍", category: "汤羹粥饭", ingredients: "羊肉、馍、糖蒜", method: "羊骨熬汤六时辰，馍掰黄豆粒大小，回锅煮制配糖蒜辣酱", effect: "温中补气，补肾壮阳", region: "northwest" },
+            { id: "chengdu", name: "天府 · 锦官城", coords: [30.5728, 104.0668], dish: "炙羊心", category: "鲜烹热食", ingredients: "羊心、藏红花、玫瑰水", method: "藏红花用玫瑰水浸泡取汁，加盐，签子串羊心火上烤，边烤边涂抹汁液", effect: "治疗心气惊悸、心情郁结", region: "southwest" },
+            { id: "nanjing", name: "金陵 · 石头城", coords: [32.0603, 118.7969], dish: "鱼脍", category: "鲜烹热食", ingredients: "鲤鱼、生姜、萝卜、葱、香菜", method: "新鲤鱼配生姜萝卜葱香菜蓼子，加芥末炒葱盐醋调和", effect: "鲜嫩爽口，开胃消食", region: "east" },
+            { id: "jinan", name: "齐州 · 济南", coords: [36.6512, 117.1201], dish: "糖蒸茄", category: "腌制发酵", ingredients: "奶茄、盐、薄荷、茴香粉、砂糖、醋", method: "嫩牛奶茄切六棱，盐腌焯水沥干，薄荷茴香粉夹棱缝，砂糖醋浸泡晒干", effect: "酸甜可口，清热解暑", region: "north" },
+            { id: "guangzhou", name: "岭南 · 五羊城", coords: [23.1291, 113.2644], dish: "酿瓜", category: "腌制发酵", ingredients: "青瓜、生姜、陈皮、薄荷、紫苏、茴香、砂糖", method: "青瓜切两片挖瓤，盐出水，生姜陈皮薄荷紫苏切丝与茴香砂糖拌匀塞入瓜内", effect: "清香爽脆，健脾开胃", region: "south" },
+            { id: "wuhan", name: "武昌 · 江城", coords: [30.5928, 114.3055], dish: "撒拌和菜", category: "鲜烹热食", ingredients: "白菜、麻油、花椒、酱油、醋、白糖", method: "麻油花椒熬煮，临用加酱油醋白糖调和，白菜豆芽水芹焯熟拌油", effect: "青翠脆嫩，可口开胃", region: "central" },
+            { id: "shenyang", name: "盛京 · 奉天", coords: [41.8045, 123.4328], dish: "藏芥", category: "腌制发酵", ingredients: "芥菜、盐", method: "芥菜晒六七分干去叶，盐腌一夜扎成小把，放瓶沥尽水，腌水煎煮取汁倒入密封", effect: "咸香爽脆，夏日佳品", region: "northeast" },
+            { id: "lanzhou", name: "金城 · 兰州", coords: [36.0611, 103.8343], dish: "河西米汤粥", category: "汤羹粥饭", ingredients: "羊肉、河西米", method: "羊肉河西米熬汤过滤，淘洗河西米，放入细乞马米葱盐熬粥", effect: "补充中气，增益精气", region: "northwest" }
+        ];
+
+        const regionCenters = {
+            north: [39.0, 115.0], northeast: [43.5, 125.0], east: [31.0, 120.0],
+            central: [30.6, 112.5], south: [23.5, 113.0], southwest: [29.5, 104.0],
+            northwest: [36.0, 106.0]
+        };
+
+        let map, markers = [], activeItem = cuisineData[0];
+        const cardPanel = document.getElementById('foodCardPanel');
+        const collapseBtn = document.getElementById('collapseCardBtn');
+
+        function expandCard() {
+            if (cardPanel.classList.contains('collapsed')) {
+                cardPanel.classList.remove('collapsed');
+                collapseBtn.textContent = '−';
+                collapseBtn.title = '收起卡片';
+            }
+        }
+
+        function collapseCard() {
+            if (!cardPanel.classList.contains('collapsed')) {
+                cardPanel.classList.add('collapsed');
+                collapseBtn.textContent = '+';
+                collapseBtn.title = '展开卡片';
+            }
+        }
+
+        function toggleCardCollapse() {
+            if (cardPanel.classList.contains('collapsed')) {
+                expandCard();
+            } else {
+                collapseCard();
+            }
+        }
+
+        collapseBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleCardCollapse();
+        });
+
+        cardPanel.addEventListener('click', (e) => {
+            if (cardPanel.classList.contains('collapsed') && e.target === cardPanel) {
+                expandCard();
+            }
+        });
+
+        function initMap() {
+            map = L.map('gourmetMap').setView([35.5, 108.0], 5);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap &copy; CartoDB',
+                subdomains: 'abcd',
+                maxZoom: 18
+            }).addTo(map);
+            map.setMaxBounds([[3.0, 72.0], [53.5, 136.0]]);
+            map.setMinZoom(4.5);
+
+            cuisineData.forEach(place => {
+                const icon = L.divIcon({
+                    html: '<div class="custom-marker-icon"><div></div></div>',
+                    iconSize: [28, 28],
+                    className: ''
+                });
+                const marker = L.marker(place.coords, { icon, riseOnHover: true })
+                    .addTo(map)
+                    .bindTooltip(`${place.name} · ${place.dish}`, { sticky: true, offset: [0, -18] });
+                marker.on('click', () => {
+                    expandCard();
+                    updateCard(place);
+                    marker.openTooltip();
+                    setTimeout(() => marker.closeTooltip(), 800);
+                });
+                markers.push({ marker, data: place });
+            });
+            const group = L.featureGroup(markers.map(m => m.marker));
+            map.fitBounds(group.getBounds().pad(0.2));
+            updateCard(activeItem);
+        }
+
+        function updateCard(place) {
+            if (!place) return;
+            activeItem = place;
+            document.getElementById('cardRegion').innerText = place.name;
+            document.getElementById('cardDish').innerText = place.dish;
+            document.getElementById('cardDesc').innerText = place.effect || place.desc || "";
+            document.getElementById('cardCategory').innerText = place.category;
+            document.getElementById('cardIngredients').innerText = place.ingredients;
+            document.getElementById('cardMethod').innerText = place.method;
+            document.getElementById('cardEffect').innerText = place.effect;
+
+            const btn = document.getElementById('openRecipeButton');
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+            newBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                showRecipeModal(place);
+            });
+        }
+
+        function showRecipeModal(place) {
+            const modal = document.getElementById('recipeScrollModal');
+            const contentDiv = document.getElementById('modalRecipeDetail');
+            if (!modal || !contentDiv) return;
+            let html = `<div style="font-weight:bold; font-size:1.3rem; color:#c1443a;"> ${place.dish}</div>`;
+            html += `<div style="margin:6px 0 12px; color:#666;"> ${place.name}</div>`;
+            html += `<div style="background:#f5f0e6; padding:12px; border-radius:12px; margin-bottom:12px;">`;
+            html += `<div style="margin-bottom:8px;"><span style="color:#b8922a; font-weight:600;">类别：</span>${place.category}</div>`;
+            html += `<div style="margin-bottom:8px;"><span style="color:#b8922a; font-weight:600;">食材：</span>${place.ingredients}</div>`;
+            html += `<div style="margin-bottom:8px;"><span style="color:#b8922a; font-weight:600;">做法：</span>${place.method}</div>`;
+            html += `<div><span style="color:#b8922a; font-weight:600;">功效：</span>${place.effect}</div></div>`;
+            contentDiv.innerHTML = html;
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('recipeScrollModal').classList.remove('active');
+        }
+
+        function flyToCurrent() {
+            if (map && activeItem) {
+                map.flyTo(activeItem.coords, 9, { duration: 1 });
+                const targetMarker = markers.find(m => m.data.id === activeItem.id);
+                if (targetMarker) {
+                    targetMarker.marker.openTooltip();
+                    setTimeout(() => targetMarker.marker.closeTooltip(), 1500);
+                }
+            }
+        }
+
+        function flyToRegion(regionCode) {
+            const center = regionCenters[regionCode];
+            if (!center) return;
+            map.flyTo(center, 6.8, { duration: 1 });
+            const rep = cuisineData.find(item => item.region === regionCode);
+            if (rep) {
+                expandCard();
+                updateCard(rep);
+            }
+            markers.forEach(m => {
+                if (m.data.region === regionCode) {
+                    m.marker.openTooltip();
+                    setTimeout(() => m.marker.closeTooltip(), 1200);
+                }
+            });
+        }
+
+        function viewFullMap() {
+            if (map) map.flyTo([35.5, 108.0], 5, { duration: 1.5 });
+        }
+
+        // 搜索功能
+        function searchPlaces(query) {
+            const resultsContainer = document.getElementById('searchResults');
+            if (!query || query.trim() === '') {
+                resultsContainer.classList.remove('active');
+                return;
+            }
+
+            const results = cuisineData.filter(place => {
+                const searchText = query.toLowerCase();
+                return place.name.toLowerCase().includes(searchText) ||
+                       place.dish.toLowerCase().includes(searchText) ||
+                       place.ingredients.toLowerCase().includes(searchText);
+            });
+
+            if (results.length === 0) {
+                resultsContainer.innerHTML = '<div class="search-no-results">未找到相关地点或菜名</div>';
+                resultsContainer.classList.add('active');
+                return;
+            }
+
+            resultsContainer.innerHTML = results.map(place => `
+                <div class="search-result-item" data-id="${place.id}">
+                    <div class="search-result-name">${place.name}</div>
+                    <div class="search-result-dish">${place.dish}</div>
+                </div>
+            `).join('');
+
+            resultsContainer.classList.add('active');
+
+            // 绑定点击事件
+            resultsContainer.querySelectorAll('.search-result-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const placeId = item.getAttribute('data-id');
+                    const place = cuisineData.find(p => p.id === placeId);
+                    if (place) {
+                        flyToPlace(place);
+                        resultsContainer.classList.remove('active');
+                        document.getElementById('searchInput').value = '';
+                    }
+                });
+            });
+        }
+
+        function flyToPlace(place) {
+            if (!map) return;
+            expandCard();
+            updateCard(place);
+            map.flyTo(place.coords, 9, { duration: 1 });
+            const targetMarker = markers.find(m => m.data.id === place.id);
+            if (targetMarker) {
+                targetMarker.marker.openTooltip();
+                setTimeout(() => targetMarker.marker.closeTooltip(), 1500);
+            }
+        }
+
+        function bindEvents() {
+            document.getElementById('flyToCurrentBtn').addEventListener('click', flyToCurrent);
+            document.getElementById('viewFullMapBtn').addEventListener('click', viewFullMap);
+            document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+            document.getElementById('recipeScrollModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('recipeScrollModal')) closeModal();
+            });
+            const btns = document.querySelectorAll('.region-btn');
+            btns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const region = btn.getAttribute('data-region');
+                    btns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    flyToRegion(region);
+                });
+            });
+
+            // 搜索功能
+            const searchInput = document.getElementById('searchInput');
+            let searchTimeout;
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    searchPlaces(e.target.value);
+                }, 300);
+            });
+
+            searchInput.addEventListener('focus', () => {
+                if (searchInput.value.trim()) {
+                    searchPlaces(searchInput.value);
+                }
+            });
+
+            // 点击外部关闭搜索结果
+            document.addEventListener('click', (e) => {
+                const searchContainer = document.querySelector('.search-container');
+                if (!searchContainer.contains(e.target)) {
+                    document.getElementById('searchResults').classList.remove('active');
+                }
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initMap();
+            bindEvents();
+        });
+    })();
+</script>
+</body>
+</html>

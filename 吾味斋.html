@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>吾味斋 · 个人中心 · 食简溯时</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.min.css">
+<style>
+@font-face { font-family:'ChillLongCangKaiShu'; src:url('ChillLongCangKaiShu_Regular.otf') format('opentype'); font-weight:normal; }
+@font-face { font-family:'ChillLongCangKaiShu'; src:url('ChillLongCangKaiShu_Bold.otf') format('opentype'); font-weight:bold; }
+
+:root {
+  --ink:#2c2416; --ink-light:#5c4a3a;
+  --rice:#f7f0e4; --rice-dark:#e8dcc8;
+  --vermilion:#c1443a; --vermilion-light:#e06b5e;
+  --gold:#b8963e; --gold-light:#d4b65e;
+  --jade:#6b8e6b; --celadon:#b4cfb4;
+  --parchment:#f2e8d5; --paper:#faf3e6;
+  --seal:#8b1a1a; --text-main:#3a3022; --text-sub:#6b5e4a;
+  --shadow:rgba(44,36,22,.12); --shadow-deep:rgba(44,36,22,.25);
+  --t-slow:.6s cubic-bezier(.25,.46,.45,.94);
+  --t-med:.4s cubic-bezier(.25,.46,.45,.94);
+}
+
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; font-size:16px; height:100%; }
+body {
+  font-family:"Noto Serif SC","Source Han Serif SC","Songti SC","SimSun",serif;
+  background:var(--rice); color:var(--text-main);
+  line-height:1.8; -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  height:100%;
+}
+
+/* ─── Scroll Indicator ─── */
+.scroll-indicator {
+  position:fixed; top:0; left:0; height:3px;
+  background:linear-gradient(90deg,var(--vermilion),var(--gold),var(--jade));
+  z-index:1000; transition:width .1s linear; width:0;
+}
+
+/* ─── Nav ─── */
+.nav {
+  position:fixed; top:0; left:0; right:0; z-index:999;
+  padding:0 2rem; display:flex; align-items:center;
+  justify-content:space-between; height:64px;
+  background:linear-gradient(180deg,rgba(20,16,10,.94) 0%,rgba(20,16,10,.78) 100%);
+  backdrop-filter:blur(10px);
+  box-shadow:0 1px 15px rgba(0,0,0,.1);
+}
+.nav-logo {
+  font-family:'ChillLongCangKaiShu','Noto Serif SC',serif;
+  font-size:1.5rem; font-weight:normal;
+  color:var(--rice); letter-spacing:.1em;
+  text-decoration:none; cursor:pointer;
+  text-shadow:0 1px 4px rgba(0,0,0,.5); transition:color var(--t-med);
+}
+.nav-logo:hover { color:var(--gold-light); }
+.nav-logo .logo-seal {
+  display:inline-block; width:28px; height:28px; line-height:28px;
+  text-align:center; background:var(--vermilion); color:var(--rice);
+  border-radius:2px; font-size:.75rem; margin-right:6px;
+  vertical-align:middle; font-weight:700;
+}
+.nav-links { display:flex; list-style:none; gap:3.5rem; }
+.nav-links a {
+  text-decoration:none; color:rgba(247,240,228,.8);
+  font-size:.95rem; letter-spacing:.04em;
+  position:relative; padding:4px 0; transition:color var(--t-med);
+}
+.nav-links a::after {
+  content:""; position:absolute; bottom:0; left:0;
+  width:0; height:1.5px; background:var(--gold-light);
+  transition:width var(--t-med);
+}
+.nav-links a:hover, .nav-links a.active { color:var(--gold-light); }
+.nav-links a:hover::after, .nav-links a.active::after { width:100%; }
+.nav-hamburger {
+  display:none; flex-direction:column; gap:5px;
+  cursor:pointer; background:none; border:none; padding:4px;
+}
+.nav-hamburger span {
+  display:block; width:24px; height:2px; background:var(--rice);
+  transition:var(--t-med); box-shadow:0 1px 3px rgba(0,0,0,.4);
+}
+
+
+
+/* ─── Main Wrapper ─── */
+.profile-wrapper {
+  margin-top:64px; padding:2rem 3% 4rem;
+}
+
+/* ═══════════════════ USER LAYOUT ═══════════════════ */
+.user-layout {
+  display:grid; grid-template-columns:280px 1fr;
+  gap:3rem; align-items:start;
+}
+
+/* ─── Sidebar ─── */
+.user-sidebar {
+  position:sticky; top:80px;
+  height:calc(100vh - 96px);
+  display:flex; flex-direction:column;
+}
+
+.user-card {
+  background:var(--paper);
+  border:1px solid rgba(184,150,62,.2);
+  box-shadow:0 4px 28px var(--shadow);
+  border-radius:4px; overflow:hidden;
+  flex:1; display:flex; flex-direction:column;
+  min-height:0;
+}
+.user-card .user-card-top {
+  border-radius:4px 4px 0 0;
+}
+.user-card-top {
+  background:linear-gradient(to bottom, rgba(247,240,228,.9) 0%, rgba(247,240,228,.7) 100%), url('首页背景2.jpg');
+  background-size:cover; background-position:center;
+  padding:1.8rem 1.3rem 0; text-align:center; position:relative;
+  flex-shrink:0;
+}
+.user-card-top::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,var(--vermilion),var(--gold),var(--jade));
+}
+.user-avatar {
+  width:66px; height:66px;
+  border:2px solid rgba(184,150,62,.45);
+  border-radius:3px; background:rgba(193,68,58,.18);
+  display:flex; align-items:center; justify-content:center;
+  margin:0 auto .85rem;
+  font-family:'ChillLongCangKaiShu',serif; font-size:1.7rem;
+  color:var(--gold-light); font-weight:bold;
+  box-shadow:0 0 0 1px rgba(184,150,62,.18), 0 4px 16px rgba(0,0,0,.3);
+  cursor:pointer; transition:box-shadow var(--t-med);
+}
+.user-avatar:hover { box-shadow:0 0 0 3px rgba(184,150,62,.3), 0 4px 20px rgba(0,0,0,.3); }
+.user-name {
+  font-family:'ChillLongCangKaiShu','Noto Serif SC',serif;
+  font-size:1.1rem; font-weight:bold; letter-spacing:.12em; color:var(--ink);
+}
+.user-bio { font-size:.68rem; font-weight:600; color:var(--text-sub); margin-top:.25rem; letter-spacing:.04em; }
+.user-stats {
+  display:flex; margin-top:1.2rem;
+  border-top:1px solid rgba(44,36,22,.1);
+}
+.user-stat {
+  flex:1; padding:.8rem .4rem; text-align:center;
+  border-right:1px solid rgba(44,36,22,.08);
+  cursor:pointer; transition:background var(--t-med);
+}
+.user-stat:last-child { border-right:none; }
+.user-stat:hover { background:rgba(44,36,22,.04); }
+.stat-num {
+  font-family:'ChillLongCangKaiShu',serif;
+  font-size:1.25rem; font-weight:bold; color:var(--vermilion); line-height:1;
+}
+.stat-lbl { font-size:.58rem; font-weight:600; color:var(--text-sub); margin-top:3px; letter-spacing:.08em; }
+
+/* Sidebar Nav */
+.user-sidenav {
+  background:transparent;
+  border:none;
+  box-shadow:none;
+  border-radius:0; overflow-y:auto; margin-bottom:0;
+  padding:.8rem 1.2rem 1rem;
+  display:flex; flex-direction:column;
+  flex:1; min-height:0;
+}
+.sidenav-item {
+  display:flex; align-items:center; gap:.85rem;
+  padding:.85rem 0;
+  text-decoration:none; color:var(--text-sub);
+  font-size:.9rem; letter-spacing:.06em;
+  border:none; border-bottom:1px dashed rgba(184,150,62,.18);
+  border-radius:0; background:none;
+  transition:all var(--t-med); cursor:pointer;
+  width:100%; text-align:left; font-family:inherit;
+}
+.sidenav-item:last-child { border-bottom:none; }
+.sidenav-item:hover { color:var(--gold); }
+.sidenav-item.active { color:var(--vermilion); font-weight:600; }
+.nav-ic { font-size:1rem; width:22px; text-align:center; flex-shrink:0; }
+.nav-badge {
+  margin-left:auto; background:var(--vermilion); color:#fff;
+  font-size:.58rem; padding:1px 6px; border-radius:10px; letter-spacing:.04em;
+}
+.btn-logout {
+  width:100%; padding:.82rem 1.2rem; background:transparent;
+  border:none; border-top:1px dashed rgba(184,150,62,.18);
+  color:var(--text-sub); font-family:inherit; font-size:.9rem;
+  letter-spacing:.06em; cursor:pointer; transition:all var(--t-med);
+  flex-shrink:0; display:flex; align-items:center; gap:.85rem;
+  text-align:left;
+}
+.btn-logout:hover { color:var(--vermilion); }
+
+/* ─── Content Area ─── */
+main { padding-right:.5rem; }
+.content-panel { display:none; animation:fadeUp .35s ease both; }
+.content-panel.active { display:block; }
+.panel-header {
+  display:flex; align-items:flex-end; justify-content:space-between;
+  margin-bottom:2rem; padding-bottom:1rem;
+  border-bottom:1px solid rgba(184,150,62,.18);
+}
+.panel-title-wrap {}
+.panel-title {
+  font-family:'ChillLongCangKaiShu','Noto Serif SC',serif;
+  font-size:1.6rem; color:var(--ink); letter-spacing:.1em;
+}
+.panel-divider { width:36px; height:2px; background:var(--vermilion); margin-top:.4rem; }
+.panel-action {
+  display:inline-flex; align-items:center; gap:.45rem;
+  padding:.5rem 1.2rem;
+  background:transparent; border:1.5px solid var(--gold-light);
+  border-radius:2px; color:var(--gold-light);
+  font-family:'ChillLongCangKaiShu','Noto Serif SC',serif;
+  font-size:.85rem; letter-spacing:.12em;
+  cursor:pointer; transition:all var(--t-med);
+}
+.panel-action:hover { background:var(--gold); color:var(--rice); box-shadow:0 4px 16px rgba(184,150,62,.3); }
+
+/* ─── Overview Panel ─── */
+.ov-grid {
+  display:grid; grid-template-columns:repeat(2,1fr); gap:1rem; margin-bottom:2.2rem;
+}
+.ov-card {
+  background:var(--paper); border:1px solid rgba(184,150,62,.18);
+  border-radius:4px; padding:1.2rem 1.3rem;
+  display:flex; align-items:center; gap:1rem;
+  box-shadow:0 2px 12px var(--shadow);
+  transition:transform var(--t-med), box-shadow var(--t-med); cursor:pointer;
+}
+.ov-card:hover { transform:translateY(-3px); box-shadow:0 8px 28px var(--shadow-deep); }
+.ov-icon {
+  width:42px; height:42px; border-radius:3px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:1.2rem;
+}
+.oi-v { background:rgba(193,68,58,.1); color:var(--vermilion); }
+.oi-g { background:rgba(184,150,62,.1); color:var(--gold); }
+.oi-j { background:rgba(107,142,107,.1); color:var(--jade); }
+.oi-i { background:rgba(44,36,22,.07); color:var(--ink); }
+.ov-num { font-family:'ChillLongCangKaiShu',serif; font-size:1.9rem; color:var(--ink); line-height:1; }
+.ov-lbl { font-size:.68rem; color:var(--text-sub); margin-top:2px; }
+
+/* Recent activity */
+.block-title {
+  font-family:'ChillLongCangKaiShu','Noto Serif SC',serif;
+  font-size:1.05rem; color:var(--ink); letter-spacing:.08em; margin-bottom:1rem;
+  display:flex; align-items:center; gap:.7rem;
+}
+.block-title::after { content:''; flex:1; height:1px; background:rgba(184,150,62,.15); }
+.activity-list { display:flex; flex-direction:column; gap:.55rem; }
+.act-item {
+  background:var(--paper); border:1px solid rgba(184,150,62,.14);
+  border-radius:3px; padding:.78rem 1.1rem;
+  display:flex; align-items:center; gap:.9rem;
+  transition:background var(--t-med);
+}
+.act-item:hover { background:var(--rice-dark); }
+.act-dot { width:7px; height:7px; border-radius:50%; background:var(--gold); flex-shrink:0; }
+.act-text { flex:1; font-size:.84rem; color:var(--text-main); }
+.act-text em { color:var(--vermilion); font-style:normal; }
+.act-time { font-size:.68rem; color:rgba(107,94,74,.4); flex-shrink:0; }
+
+/* ─── Favorites Panel ─── */
+.fav-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.3rem; }
+.fav-card {
+  background:var(--paper); border:1px solid rgba(184,150,62,.2);
+  border-radius:4px; overflow:hidden;
+  box-shadow:0 2px 12px var(--shadow);
+  transition:transform var(--t-med), box-shadow var(--t-med); cursor:pointer;
+  position:relative;
+}
+.fav-card:hover { transform:translateY(-3px); box-shadow:0 8px 32px var(--shadow-deep); }
+.fav-stripe { height:5px; }
+.fav-stripe.yuan { background:linear-gradient(90deg,#3a6b52,#5e9e74); }
+.fav-stripe.song { background:linear-gradient(90deg,var(--vermilion),var(--gold)); }
+.fav-stripe.ming { background:linear-gradient(90deg,#5a4a9a,#8a6aba); }
+.fav-stripe.qing { background:linear-gradient(90deg,var(--ink),#5c4a3a); }
+.fav-body { padding:1.1rem 1.2rem .8rem; }
+.fav-dynasty { font-size:.63rem; letter-spacing:.16em; color:var(--gold); margin-bottom:.35rem; }
+.fav-name {
+  font-family:'ChillLongCangKaiShu','Noto Serif SC',serif;
+  font-size:1.2rem; color:var(--ink); letter-spacing:.06em; margin-bottom:.3rem;
+}
+.fav-source { font-size:.73rem; color:var(--text-sub); }
+.fav-footer {
+  padding:.6rem 1.2rem;
+  border-top:1px solid rgba(184,150,62,.1);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.fav-tag {
+  font-size:.62rem; letter-spacing:.1em; padding:2px 8px;
+  border:1px solid rgba(107,142,107,.35); color:var(--jade); border-radius:2px;
+}
+.fav-bookmark { position:absolute; top:.9rem; right:.9rem; color:var(--gold); font-size:.85rem; }
+.btn-fav-del {
+  background:none; border:none; cursor:pointer;
+  color:rgba(107,94,74,.3); font-size:.78rem;
+  transition:color var(--t-med);
+}
+.btn-fav-del:hover { color:var(--vermilion); }
+.empty-state {
+  grid-column:1/-1; text-align:center; padding:12rem 2rem 4rem; color:var(--text-sub);
+}
+.empty-icon { font-size:3rem; opacity:.2; margin-bottom:1rem; }
+.empty-state p { font-size:.88rem; letter-spacing:.06em; }
+
+/* ─── Check-ins Panel ─── */
+.ci-timeline {
+  display:grid; grid-template-columns:repeat(2,1fr); gap:1.3rem;
+}
+.ci-item { position:relative; }
+.ci-dot { display:none; }
+.ci-card {
+  background:var(--paper); border:1px solid rgba(184,150,62,.2);
+  border-radius:6px; overflow:hidden; box-shadow:0 2px 12px var(--shadow);
+  transition:transform var(--t-med);
+  display:flex; flex-direction:column; height:100%;
+}
+.ci-card:hover { transform:translateY(-3px); box-shadow:0 8px 28px var(--shadow-deep); }
+/* Image hero */
+.ci-hero {
+  width:100%; height:180px; overflow:hidden; flex-shrink:0;
+  display:flex; position:relative;
+  background:linear-gradient(135deg, var(--rice-dark), var(--parchment));
+}
+.ci-hero-empty {
+  display:flex; align-items:center; justify-content:center;
+  color:rgba(107,94,74,.2); font-size:.78rem; letter-spacing:.08em;
+}
+.ci-hero-img {
+  flex:1; min-width:0; object-fit:cover;
+  cursor:pointer; transition:opacity var(--t-med);
+}
+.ci-hero-img:hover { opacity:.88; }
+.ci-hero-img.zoomed {
+  position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:auto; height:auto; max-width:90vw; max-height:90vh;
+  z-index:1200; border-radius:6px; flex:none;
+  box-shadow:0 16px 48px rgba(0,0,0,.5);
+}
+.ci-img-count {
+  position:absolute; bottom:.4rem; right:.5rem;
+  background:rgba(20,16,10,.6); color:var(--rice);
+  font-size:.6rem; padding:2px 7px; border-radius:3px;
+  letter-spacing:.06em;
+}
+/* Text area */
+.ci-card-head {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:.35rem;
+}
+.ci-recipe-name {
+  font-family:'ChillLongCangKaiShu','Noto Serif SC',serif;
+  font-size:1rem; color:var(--ink); letter-spacing:.06em;
+}
+.ci-tag {
+  font-size:.58rem; letter-spacing:.1em;
+  color:var(--gold); border:1px solid rgba(184,150,62,.28);
+  padding:2px 7px; border-radius:2px; flex-shrink:0;
+}
+.ci-card-body { padding:.9rem 1.1rem; flex:1; display:flex; flex-direction:column; }
+.ci-note {
+  font-size:.8rem; color:var(--text-sub); line-height:1.7; letter-spacing:.03em;
+  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
+}
+.ci-card-foot {
+  padding:.5rem 1.1rem;
+  display:flex; align-items:center; justify-content:space-between;
+  border-top:1px solid rgba(184,150,62,.08); flex-shrink:0;
+}
+.ci-date { font-size:.65rem; color:rgba(107,94,74,.4); }
+.ci-actions { display:flex; gap:.5rem; }
+.ci-action {
+  font-size:.68rem; color:rgba(107,94,74,.38);
+  background:none; border:none; cursor:pointer;
+  transition:color var(--t-med); display:flex; align-items:center; gap:2px;
+}
+.ci-action:hover { color:var(--vermilion); }
+
+/* ─── Settings Panel ─── */
+.settings-block {
+  background:var(--paper);
+  border:1px solid rgba(184,150,62,.2);
+  border-radius:4px; box-shadow:0 2px 12px var(--shadow);
+  overflow:hidden;
+}
+.set-section {
+  padding:1.3rem 1.5rem;
+  border-bottom:1px solid rgba(184,150,62,.12);
+}
+.set-section-label {
+  font-family:'ChillLongCangKaiShu','Noto Serif SC',serif;
+  font-size:.88rem; color:var(--gold); letter-spacing:.08em;
+  margin-bottom:.8rem; padding-bottom:.5rem;
+  border-bottom:1px dotted rgba(184,150,62,.18);
+}
+.s-card {
+  background:var(--paper);
+  border:1px solid rgba(184,150,62,.2);
+  border-radius:4px; overflow:hidden; box-shadow:0 2px 12px var(--shadow);
+}
+.s-card.full { grid-column:1/-1; }
+.s-card-head {
+  padding:.9rem 1.3rem;
+  border-bottom:1px solid rgba(184,150,62,.12);
+  display:flex; align-items:center; gap:.65rem;
+  background:rgba(184,150,62,.025);
+}
+.s-card-icon { color:var(--gold); font-size:.88rem; }
+.s-card-title {
+  font-family:'ChillLongCangKaiShu','Noto Serif SC',serif;
+  font-size:.93rem; color:var(--ink); letter-spacing:.06em;
+}
+.s-card-body { padding:1.3rem; }
+.avatar-row { display:flex; align-items:center; gap:1.4rem; }
+.avatar-prev {
+  width:62px; height:62px; border:2px solid rgba(184,150,62,.38); border-radius:3px;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'ChillLongCangKaiShu',serif; font-size:1.5rem; color:var(--gold);
+  background:linear-gradient(135deg,var(--rice-dark),var(--parchment)); flex-shrink:0;
+}
+.avatar-info p { font-size:.76rem; color:var(--text-sub); line-height:1.7; }
+.btn-upload {
+  display:inline-block; margin-top:.4rem; padding:.38rem .95rem;
+  background:transparent; border:1px solid rgba(184,150,62,.28); border-radius:2px;
+  font-size:.76rem; color:var(--gold); cursor:pointer; font-family:inherit;
+  transition:all var(--t-med);
+}
+.btn-upload:hover { border-color:var(--gold); background:rgba(184,150,62,.06); }
+/* Notification toggles */
+.notif-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:.72rem 0; border-bottom:1px solid rgba(184,150,62,.08);
+}
+.notif-row:last-child { border-bottom:none; }
+.notif-lbl { font-size:.86rem; color:var(--text-main); }
+.notif-sub { font-size:.68rem; color:var(--text-sub); margin-top:2px; }
+.toggle {
+  width:38px; height:20px; background:rgba(184,150,62,.15);
+  border-radius:10px; position:relative; cursor:pointer;
+  transition:background var(--t-med); flex-shrink:0;
+}
+.toggle.on { background:var(--gold); }
+.toggle::after {
+  content:''; position:absolute;
+  width:14px; height:14px; background:#fff; border-radius:50%;
+  top:3px; left:3px; transition:left var(--t-med);
+  box-shadow:0 1px 4px rgba(0,0,0,.18);
+}
+.toggle.on::after { left:21px; }
+/* Password strength */
+.pwd-strength { margin-top:.38rem; display:flex; gap:3px; }
+.pwd-bar {
+  height:3px; flex:1; background:rgba(184,150,62,.12); border-radius:2px;
+  transition:background var(--t-med);
+}
+/* Save row */
+.s-save-row {
+  display:flex; justify-content:flex-end; gap:.75rem;
+  margin-top:1.1rem; padding-top:1.1rem;
+  border-top:1px solid rgba(184,150,62,.12);
+}
+.btn-cancel {
+  padding:.55rem 1.2rem; background:transparent;
+  border:1px solid rgba(184,150,62,.22); border-radius:2px;
+  color:var(--text-sub); font-family:inherit; font-size:.86rem;
+  letter-spacing:.06em; cursor:pointer; transition:all var(--t-med);
+}
+.btn-cancel:hover { border-color:var(--vermilion); color:var(--vermilion); }
+.btn-save {
+  padding:.55rem 1.5rem; background:var(--vermilion); border:none;
+  border-radius:2px; color:var(--rice);
+  font-family:'ChillLongCangKaiShu','Noto Serif SC',serif;
+  font-size:.9rem; letter-spacing:.12em;
+  cursor:pointer; transition:all var(--t-med);
+}
+.btn-save:hover { background:var(--seal); box-shadow:0 4px 16px rgba(193,68,58,.3); }
+/* Danger zone */
+.danger-zone {
+  background:rgba(193,68,58,.04); border:1px solid rgba(193,68,58,.18);
+  border-radius:3px; padding:1.1rem 1.3rem; margin-top:1.3rem;
+}
+.danger-title { font-size:.76rem; color:var(--vermilion); letter-spacing:.1em; margin-bottom:.6rem; }
+.danger-desc { font-size:.76rem; color:var(--text-sub); margin-bottom:.9rem; line-height:1.7; }
+.btn-danger {
+  padding:.45rem 1.1rem; background:transparent;
+  border:1px solid rgba(193,68,58,.45); border-radius:2px;
+  color:var(--vermilion); font-size:.8rem;
+  cursor:pointer; font-family:inherit; letter-spacing:.06em; transition:all var(--t-med);
+}
+.btn-danger:hover { background:var(--vermilion); color:var(--rice); }
+
+/* ─── Toast ─── */
+.toast-box {
+  position:fixed; bottom:2rem; right:2rem; z-index:1200;
+  display:flex; flex-direction:column; gap:.45rem; pointer-events:none;
+}
+.toast {
+  background:var(--ink); color:var(--rice);
+  padding:.7rem 1.2rem; border-radius:3px;
+  font-size:.84rem; letter-spacing:.04em;
+  box-shadow:0 8px 32px var(--shadow-deep);
+  display:flex; align-items:center; gap:.65rem;
+  transform:translateX(120%); transition:transform .38s var(--t-slow);
+  border-left:3px solid var(--gold); min-width:200px;
+}
+.toast.show { transform:translateX(0); }
+.toast.ok { border-left-color:var(--jade); }
+.toast.err { border-left-color:var(--vermilion); }
+
+/* ─── Form Elements ─── */
+.form-group { margin-bottom:1rem; }
+.form-label {
+  display:block; font-size:.78rem; color:var(--text-sub);
+  letter-spacing:.1em; margin-bottom:.4rem;
+}
+.form-input {
+  width:100%; padding:.6rem .85rem;
+  border:1px solid rgba(184,150,62,.25); border-radius:3px;
+  font-size:.88rem; font-family:inherit; color:var(--ink);
+  background:var(--rice); transition:border-color var(--t-med);
+  outline:none;
+}
+.form-input:focus { border-color:var(--gold); }
+.form-textarea {
+  width:100%; padding:.6rem .85rem;
+  border:1px solid rgba(184,150,62,.25); border-radius:3px;
+  font-size:.88rem; font-family:inherit; color:var(--ink);
+  background:var(--rice); transition:border-color var(--t-med);
+  outline:none; resize:vertical; line-height:1.7;
+}
+.form-textarea:focus { border-color:var(--gold); }
+
+/* ─── Modal ─── */
+.modal-overlay {
+  display:none; position:fixed; inset:0; z-index:1100;
+  background:rgba(20,16,10,.55); backdrop-filter:blur(4px);
+  align-items:center; justify-content:center;
+}
+.modal-overlay.show { display:flex; }
+.modal-card {
+  background:var(--paper); border-radius:6px;
+  border:1px solid rgba(184,150,62,.25);
+  box-shadow:0 16px 48px rgba(0,0,0,.35);
+  width:560px; max-width:94vw; max-height:90vh;
+  display:flex; flex-direction:column;
+  animation:modalIn .3s ease both;
+}
+@keyframes modalIn {
+  from { opacity:0; transform:translateY(24px) scale(.97); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+.modal-head {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:1.2rem 1.5rem;
+  border-bottom:1px solid rgba(184,150,62,.15);
+}
+.modal-title {
+  font-family:'ChillLongCangKaiShu','Noto Serif SC',serif;
+  font-size:1.2rem; color:var(--ink); letter-spacing:.1em;
+}
+.modal-close {
+  background:none; border:none; font-size:1.1rem; color:var(--text-sub);
+  cursor:pointer; transition:color var(--t-med); padding:4px 8px;
+}
+.modal-close:hover { color:var(--vermilion); }
+.modal-body {
+  padding:1.5rem; overflow-y:auto; flex:1;
+}
+.modal-foot {
+  display:flex; justify-content:flex-end; gap:.75rem;
+  padding:1rem 1.5rem;
+  border-top:1px solid rgba(184,150,62,.12);
+}
+
+/* Upload */
+.upload-zone {
+  border:1.5px dashed rgba(184,150,62,.3); border-radius:4px;
+  padding:2rem 1rem; text-align:center; cursor:pointer;
+  transition:all var(--t-med);
+  display:flex; flex-direction:column; align-items:center; gap:.35rem;
+}
+.upload-zone:hover { border-color:var(--gold); background:rgba(184,150,62,.04); }
+.upload-icon { font-size:1.6rem; opacity:.4; }
+.upload-text { font-size:.84rem; color:var(--text-sub); }
+.upload-hint { font-size:.68rem; color:rgba(107,94,74,.35); }
+.preview-row {
+  display:flex; gap:.5rem; margin-top:.7rem; flex-wrap:wrap;
+}
+.preview-thumb {
+  width:72px; height:72px; border-radius:3px;
+  border:1px solid rgba(184,150,62,.2); object-fit:cover;
+  position:relative;
+}
+.preview-thumb-wrap { position:relative; }
+.preview-del {
+  position:absolute; top:-6px; right:-6px;
+  width:18px; height:18px; background:var(--vermilion); color:#fff;
+  border:none; border-radius:50%; font-size:.6rem; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  line-height:1;
+}
+
+/* ─── Footer ─── */
+.footer {
+  background:var(--ink); color:rgba(255,255,255,.5);
+  text-align:center; padding:4rem 2rem 3rem; font-size:.8rem;
+}
+.footer-title {
+  font-family:'ChillLongCangKaiShu','Noto Serif SC',serif;
+  font-size:1.5rem; color:var(--rice); font-weight:normal;
+  letter-spacing:.1em; margin-bottom:.5rem;
+}
+.footer-divider { width:40px; height:1px; background:var(--gold); margin:1.5rem auto; }
+.footer p { line-height:2; letter-spacing:.04em; }
+
+/* ─── Responsive ─── */
+@media (max-width:900px) {
+  .user-layout { grid-template-columns:1fr; }
+  .user-sidebar { position:static; height:auto; }
+  .ov-grid { grid-template-columns:1fr 1fr; }
+  .fav-grid { grid-template-columns:1fr; }
+  .ci-timeline { grid-template-columns:1fr; }
+}
+@media (max-width:768px) {
+  .nav-links { display:none; }
+  .nav-hamburger { display:flex; }
+  .nav-links.open {
+    display:flex; flex-direction:column;
+    position:absolute; top:64px; left:0; right:0;
+    background:rgba(20,16,10,.96); backdrop-filter:blur(12px);
+    padding:1.5rem 2rem; gap:1.2rem; box-shadow:0 8px 30px var(--shadow);
+  }
+}
+@media (max-width:480px) {
+  .profile-wrapper { padding:2rem 1rem 5rem; }
+  .auth-form { padding:1.5rem 1.4rem 2rem; }
+  .auth-head { padding:2rem 1.4rem 0; }
+  .auth-tabs { margin:1.5rem 1.4rem 0; }
+  .ov-grid { grid-template-columns:1fr 1fr; gap:.7rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="scroll-indicator" id="scrollIndicator"></div>
+
+<!-- ── Nav ─────────────────────────────── -->
+<nav class="nav" id="nav">
+  <a href="首页.html" class="nav-logo">
+    <span class="logo-seal">食</span>食简溯时
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html">首页</a></li>
+    <li><a href="芸编食简.html">芸编食简</a></li>
+    <li><a href="味脉简谱.html">味脉简谱</a></li>
+    <li><a href="馔迹简行.html">馔迹简行</a></li>
+    <li><a href="试味简录.html">试味简录</a></li>
+    <li><a href="吾味斋.html" class="active">吾味斋</a></li>
+    <li><a href="关于本简.html">关于本简</a></li>
+  </ul>
+  <button class="nav-hamburger" id="navHamburger" aria-label="菜单">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- ── Main Content ──────────────────────── -->
+<div class="profile-wrapper">
+
+  <!-- ════ USER STATE ════ -->
+  <div id="userState">
+    <div class="user-layout">
+
+      <!-- ── Sidebar ── -->
+      <aside class="user-sidebar">
+        <!-- User Card + Nav -->
+        <div class="user-card">
+          <div class="user-card-top">
+            <div class="user-avatar" title="点击更换头像" onclick="toast('头像更换功能即将开放')">食</div>
+            <div class="user-name">知 味 客</div>
+            <div class="user-bio">古籍食谱爱好者</div>
+            <div class="user-stats">
+              <div class="user-stat" onclick="switchPanel('favorites')">
+                <div class="stat-num" id="statFavCount">2</div>
+                <div class="stat-lbl">我的收藏</div>
+              </div>
+              <div class="user-stat" onclick="switchPanel('checkins')">
+                <div class="stat-num" id="statCiCount">2</div>
+                <div class="stat-lbl">打卡记录</div>
+              </div>
+            </div>
+          </div>
+          <div class="user-sidenav">
+            <button class="sidenav-item active" id="nav-overview" onclick="switchPanel('overview')">
+              <span class="nav-ic">◈</span> 吾之档案
+            </button>
+            <button class="sidenav-item" id="nav-favorites" onclick="switchPanel('favorites')">
+              <span class="nav-ic">◇</span> 我的收藏
+            </button>
+            <button class="sidenav-item" id="nav-checkins" onclick="switchPanel('checkins')">
+              <span class="nav-ic">✦</span> 我的打卡
+            </button>
+            <button class="sidenav-item" id="nav-settings" onclick="switchPanel('settings')">
+              <span class="nav-ic">⊙</span> 账号设置
+            </button>
+          </div>
+          <button class="btn-logout" onclick="doLogout()">
+            <span class="nav-ic">↩</span> 退出登录
+          </button>
+        </div>
+      </aside>
+
+      <!-- ── Content ── -->
+      <main>
+
+        <!-- ── Overview ── -->
+        <div class="content-panel active" id="panel-overview">
+          <div class="panel-header">
+            <div class="panel-title-wrap">
+              <div class="panel-title">吾之档案</div>
+              <div class="panel-divider"></div>
+            </div>
+          </div>
+          <!-- Stats -->
+          <div class="ov-grid">
+            <div class="ov-card" onclick="switchPanel('favorites')">
+              <div class="ov-icon oi-v">◇</div>
+              <div><div class="ov-num" id="ovFavCount">2</div><div class="ov-lbl">已收藏食谱</div></div>
+            </div>
+            <div class="ov-card" onclick="switchPanel('checkins')">
+              <div class="ov-icon oi-g">✦</div>
+              <div><div class="ov-num" id="ovCiCount">2</div><div class="ov-lbl">打卡次数</div></div>
+            </div>
+          </div>
+          <!-- Activity -->
+          <div class="block-title">最近动态</div>
+          <div class="activity-list" id="activityList">
+            <!-- dynamic -->
+          </div>
+        </div>
+
+        <!-- ── Favorites ── -->
+        <div class="content-panel" id="panel-favorites">
+          <div class="panel-header">
+            <div class="panel-title-wrap">
+              <div class="panel-title">我的收藏</div>
+              <div class="panel-divider"></div>
+            </div>
+            <a href="芸编食简.html" class="panel-action" style="text-decoration:none;">＋ 继续收藏</a>
+          </div>
+          <div class="fav-grid" id="favGrid">
+            <!-- generated by JS -->
+          </div>
+        </div>
+
+        <!-- ── Check-ins ── -->
+        <div class="content-panel" id="panel-checkins">
+          <div class="panel-header">
+            <div class="panel-title-wrap">
+              <div class="panel-title">我的打卡</div>
+              <div class="panel-divider"></div>
+            </div>
+            <button class="panel-action" onclick="openPublishModal()">＋ 发布打卡</button>
+          </div>
+          <div class="ci-timeline" id="ciTimeline">
+            <!-- generated by JS -->
+          </div>
+        </div>
+
+        <!-- ── Settings ── -->
+        <div class="content-panel" id="panel-settings">
+          <div class="panel-header">
+            <div class="panel-title-wrap">
+              <div class="panel-title">账号设置</div>
+              <div class="panel-divider"></div>
+            </div>
+          </div>
+          <div class="settings-block">
+
+            <!-- 头像 -->
+            <div class="set-section">
+              <div class="set-section-label">头像与资料</div>
+              <div class="avatar-row">
+                <div class="avatar-prev">食</div>
+                <div class="avatar-info">
+                  <p>支持 JPG、PNG 格式，建议尺寸 200×200 以上</p>
+                  <button class="btn-upload">上传头像</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 基本信息 -->
+            <div class="set-section">
+              <div class="set-section-label">基本信息</div>
+              <div class="form-group">
+                <label class="form-label">用户名</label>
+                <input class="form-input" type="text" value="知味客">
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label">个人简介</label>
+                <input class="form-input" type="text" value="酷爱古籍饮食，以现代方法复刻古代菜肴">
+              </div>
+            </div>
+
+            <!-- 账号安全 -->
+            <div class="set-section" style="border-bottom:none;">
+              <div class="set-section-label">账号安全</div>
+              <div class="form-group">
+                <label class="form-label">绑定邮箱</label>
+                <input class="form-input" type="email" value="luzhiwei@example.com">
+              </div>
+              <div class="form-group">
+                <label class="form-label">新密码</label>
+                <input class="form-input" type="password" placeholder="留空则不修改"
+                  oninput="checkPwdStrength(this.value,'s')">
+                <div class="pwd-strength">
+                  <div class="pwd-bar" id="spb1"></div>
+                  <div class="pwd-bar" id="spb2"></div>
+                  <div class="pwd-bar" id="spb3"></div>
+                  <div class="pwd-bar" id="spb4"></div>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label">确认新密码</label>
+                <input class="form-input" type="password" placeholder="再次输入新密码">
+              </div>
+            </div>
+
+            <div class="s-save-row">
+              <button class="btn-cancel">取消</button>
+              <button class="btn-save" onclick="toast('设置已保存', 'ok')">保存更改</button>
+            </div>
+
+          </div><!-- /settings-block -->
+
+          <!-- 危险区域 -->
+          <div class="s-card" style="margin-top:1.3rem;">
+            <div class="s-card-head">
+              <span class="s-card-icon" style="color:var(--vermilion)">⚠</span>
+              <span class="s-card-title" style="color:var(--vermilion)">危险操作</span>
+            </div>
+            <div class="s-card-body">
+              <div style="display:flex;gap:2rem;flex-wrap:wrap">
+                <div class="danger-zone" style="flex:1;min-width:240px">
+                  <div class="danger-title">注销账号</div>
+                  <div class="danger-desc">注销后将永久删除所有数据，包括收藏、打卡数据，且无法恢复。</div>
+                  <button class="btn-danger" onclick="toast('请联系管理员完成注销', 'err')">申请注销</button>
+                </div>
+                <div class="danger-zone" style="flex:1;min-width:240px">
+                  <div class="danger-title">清除数据</div>
+                  <div class="danger-desc">清除本地缓存与浏览记录，不影响云端存储的收藏与打卡数据。</div>
+                  <button class="btn-danger" onclick="toast('本地缓存已清除', 'ok')">清除缓存</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /panel-settings -->
+
+      </main>
+    </div><!-- /user-layout -->
+  </div><!-- /userState -->
+
+</div><!-- /profile-wrapper -->
+
+<!-- ─── Footer ──────────────────────── -->
+<footer class="footer">
+  <div class="footer-title">食简溯时</div>
+  <div class="footer-divider"></div>
+  <p>古籍饮食数字档案 · Digital Archive of Classical Cuisine<br>
+  以数字技术保存、展示与传播中华古籍中的饮食文化遗产<br>
+  &copy; 2026 食简项目</p>
+</footer>
+
+<!-- ─── Publish Check-in Modal ─── -->
+<div class="modal-overlay" id="publishModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <span class="modal-title">发布打卡</span>
+      <button class="modal-close" onclick="closePublishModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">食谱名称</label>
+        <input class="form-input" type="text" id="ciRecipeName" placeholder="如：炉焙鸡">
+      </div>
+      <div class="form-group">
+        <label class="form-label">出处标签</label>
+        <input class="form-input" type="text" id="ciTag" placeholder="如：宋 · 《吴氏中馈录》">
+      </div>
+      <div class="form-group">
+        <label class="form-label">打卡笔记</label>
+        <textarea class="form-textarea" id="ciNote" rows="5" placeholder="记录你的复刻体验、心得感悟……"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">上传图片</label>
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('ciImage').click()">
+          <span class="upload-icon">⬆</span>
+          <span class="upload-text">点击上传图片</span>
+          <span class="upload-hint">支持 JPG / PNG，最多 3 张</span>
+          <input type="file" id="ciImage" accept="image/*" multiple hidden onchange="handleImageSelect(event)">
+        </div>
+        <div class="preview-row" id="previewRow"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closePublishModal()">取 消</button>
+      <button class="btn-save" onclick="submitCheckin()">发布打卡</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-box" id="toastBox"></div>
+
+<script>
+'use strict';
+
+// ─── Scroll indicator + Nav ──────────────────────────
+(function(){
+  var si = document.getElementById('scrollIndicator');
+  var nav = document.getElementById('nav');
+  var ticking = false;
+  function update(){
+    var s = document.documentElement.scrollTop;
+    var h = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    si.style.width = h ? (s/h*100)+'%' : '0%';
+    nav.classList.toggle('scrolled', s > 40);
+    ticking = false;
+  }
+  window.addEventListener('scroll', function(){
+    if(!ticking){ requestAnimationFrame(update); ticking=true; }
+  }, { passive:true });
+  document.getElementById('navHamburger').addEventListener('click', function(){
+    document.getElementById('navLinks').classList.toggle('open');
+  });
+})();
+
+// ─── Toast ───────────────────────────────────────────
+function toast(msg, type){
+  var box = document.getElementById('toastBox');
+  var el = document.createElement('div');
+  el.className = 'toast' + (type ? ' '+type : '');
+  var icon = type==='ok' ? '✦' : type==='err' ? '◈' : '◇';
+  el.innerHTML = '<span style="color:var(--gold-light)">' + icon + '</span>' + msg;
+  box.appendChild(el);
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ el.classList.add('show'); }); });
+  setTimeout(function(){
+    el.classList.remove('show');
+    setTimeout(function(){ el.remove(); }, 400);
+  }, 2800);
+}
+
+// ─── Initialize ─────────────────────────────────────
+window.addEventListener('load', function(){
+  renderAll();
+});
+
+function doLogout(){
+  toast('已安全退出');
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+// ─── Publish Check-in Modal ──────────────────────────
+var selectedImages = [];
+
+function openPublishModal(){
+  document.getElementById('publishModal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePublishModal(){
+  document.getElementById('publishModal').classList.remove('show');
+  document.body.style.overflow = '';
+  clearPublishForm();
+}
+
+function clearPublishForm(){
+  document.getElementById('ciRecipeName').value = '';
+  document.getElementById('ciTag').value = '';
+  document.getElementById('ciNote').value = '';
+  document.getElementById('ciImage').value = '';
+  selectedImages = [];
+  renderPreviews();
+}
+
+function handleImageSelect(e){
+  var files = Array.from(e.target.files);
+  files.forEach(function(f){
+    if(selectedImages.length >= 3){ return; }
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      selectedImages.push(ev.target.result);
+      renderPreviews();
+    };
+    reader.readAsDataURL(f);
+  });
+  e.target.value = '';
+}
+
+function removeImage(idx){
+  selectedImages.splice(idx, 1);
+  renderPreviews();
+}
+
+function renderPreviews(){
+  var row = document.getElementById('previewRow');
+  row.innerHTML = selectedImages.map(function(src, i){
+    return '<div class="preview-thumb-wrap">'
+      +'<img class="preview-thumb" src="'+src+'" alt="">'
+      +'<button class="preview-del" onclick="removeImage('+i+')">✕</button>'
+      +'</div>';
+  }).join('');
+}
+
+function submitCheckin(){
+  var name = document.getElementById('ciRecipeName').value.trim();
+  var tag = document.getElementById('ciTag').value.trim();
+  var note = document.getElementById('ciNote').value.trim();
+  if(!name){ toast('请输入食谱名称', 'err'); return; }
+  if(!tag){ toast('请输入出处标签', 'err'); return; }
+  if(!note){ toast('请输入打卡笔记', 'err'); return; }
+
+  // Build today's date string
+  var d = new Date();
+  var dateStr = d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日';
+
+  // Add to checkins
+  var newCi = {
+    id: Date.now(),
+    recipe: name,
+    tag: tag,
+    note: note,
+    date: dateStr,
+    likes: 0, comments: 0,
+    images: selectedImages.slice()
+  };
+  CHECKINS.unshift(newCi);
+  renderCheckins();
+  closePublishModal();
+  toast('打卡发布成功！', 'ok');
+}
+
+// Click overlay to close
+document.getElementById('publishModal').addEventListener('click', function(e){
+  if(e.target === this) closePublishModal();
+});
+
+// ─── Panel switch ────────────────────────────────────
+function switchPanel(id){
+  document.querySelectorAll('.content-panel').forEach(function(p){
+    p.classList.remove('active');
+  });
+  document.getElementById('panel-'+id).classList.add('active');
+  document.querySelectorAll('.sidenav-item').forEach(function(b){
+    b.classList.remove('active');
+  });
+  var nb = document.getElementById('nav-'+id);
+  if(nb) nb.classList.add('active');
+}
+
+// ─── Password strength ───────────────────────────────
+function checkPwdStrength(val, prefix){
+  var p = prefix || '';
+  var bars = [
+    document.getElementById(p+'pb1'),
+    document.getElementById(p+'pb2'),
+    document.getElementById(p+'pb3'),
+    document.getElementById(p+'pb4'),
+  ].filter(Boolean);
+  if(!bars.length) return;
+  var s = 0;
+  if(val.length >= 6) s++;
+  if(val.length >= 10) s++;
+  if(/[A-Za-z]/.test(val) && /\d/.test(val)) s++;
+  if(/[^A-Za-z0-9]/.test(val)) s++;
+  var colors = ['','var(--vermilion)','var(--gold)','var(--gold-light)','var(--jade)'];
+  bars.forEach(function(b, i){
+    b.style.background = i < s ? colors[s] : 'rgba(184,150,62,.12)';
+  });
+}
+
+// ─── Favorites data ──────────────────────────────────
+function loadFavorites(){
+  try{ return JSON.parse(localStorage.getItem('wuweizhai_favs') || '[]'); }
+  catch(e){ return []; }
+}
+var FAVORITES = loadFavorites();
+
+function renderFavorites(){
+  var grid = document.getElementById('favGrid');
+  if(!FAVORITES.length){
+    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">◇</div><p>暂无收藏，去食简探索吧</p></div>';
+    return;
+  }
+  grid.innerHTML = FAVORITES.map(function(f){
+    return '<div class="fav-card" id="fav-'+f.id+'">'
+      +'<div class="fav-stripe '+f.stripe+'"></div>'
+      +'<span class="fav-bookmark">◇</span>'
+      +'<div class="fav-body">'
+        +'<div class="fav-dynasty">'+f.dynasty+'代 · '+f.source+'</div>'
+        +'<div class="fav-name">'+f.name+'</div>'
+        +'<div class="fav-source">'+f.tag+'</div>'
+      +'</div>'
+      +'<div class="fav-footer">'
+        +'<span class="fav-tag">'+f.tag+'</span>'
+        +'<button class="btn-fav-del" onclick="removeFav('+f.id+')">✕ 取消收藏</button>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+function removeFav(id){
+  FAVORITES = FAVORITES.filter(function(f){ return f.id !== id; });
+  localStorage.setItem('wuweizhai_favs', JSON.stringify(FAVORITES));
+  renderFavorites();
+  syncCounts();
+  toast('已取消收藏');
+}
+
+function removeCheckin(id){
+  CHECKINS = CHECKINS.filter(function(c){ return c.id !== id; });
+  renderCheckins();
+  syncCounts();
+  renderActivity();
+  toast('打卡已删除', 'err');
+}
+
+// ─── Check-ins data ──────────────────────────────────
+var CHECKINS = [
+  {
+    id:1, recipe:'炉焙鸡', tag:'宋 · 《吴氏中馈录》',
+    note:'依古法复刻，醋与酒各半反复煨至汤汁收干，鸡肉酥烂异常，唇齿留香。',
+    date:'2026年5月30日', likes:0, comments:0
+  },
+  {
+    id:2, recipe:'蟹　　生', tag:'宋 · 《吴氏中馈录》',
+    note:'试制宋代蟹生，麻油与草果、砂仁的配合远超预期。腌渍一夜后，鲜味内敛而辛香外扬。',
+    date:'2026年5月24日', likes:0, comments:0
+  },
+];
+
+function renderCheckins(){
+  var tl = document.getElementById('ciTimeline');
+  tl.innerHTML = CHECKINS.map(function(c){
+    var imgs = '';
+    var hasImg = c.images && c.images.length;
+    if(hasImg){
+      imgs = '<div class="ci-hero">'
+        + c.images.map(function(src){
+            return '<img class="ci-hero-img" src="'+src+'" alt="" onclick="this.classList.toggle(\'zoomed\')">';
+          }).join('')
+        + (c.images.length>1 ? '<span class="ci-img-count">'+c.images.length+' 张</span>' : '')
+        + '</div>';
+    }
+    return '<div class="ci-item">'
+      +'<div class="ci-dot"></div>'
+      +'<div class="ci-card">'
+        + (hasImg ? imgs : '<div class="ci-hero ci-hero-empty"><span>未传图片</span></div>')
+        +'<div class="ci-card-body">'
+          +'<div class="ci-card-head">'
+            +'<div class="ci-recipe-name">'+c.recipe+'</div>'
+            +'<span class="ci-tag">'+c.tag+'</span>'
+          +'</div>'
+          +'<p class="ci-note">'+c.note+'</p>'
+        +'</div>'
+        +'<div class="ci-card-foot">'
+          +'<span class="ci-date">'+c.date+'</span>'
+          +'<div class="ci-actions">'
+            +'<button class="ci-action" onclick="toast(\'已点赞\', \'ok\')">♥ '+c.likes+'</button>'
+            +'<button class="ci-action" onclick="toast(\'查看评论功能开发中\')">◎ '+c.comments+'</button>'
+            +'<button class="ci-action" onclick="removeCheckin('+c.id+')">✕ 删除</button>'
+          +'</div>'
+        +'</div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+function syncCounts(){
+  var fc = FAVORITES.length;
+  var cc = CHECKINS.length;
+  ['statFavCount','ovFavCount','badgeFav'].forEach(function(id){ var el = document.getElementById(id); if(el) el.textContent = fc; });
+  ['statCiCount','ovCiCount','badgeCi'].forEach(function(id){ var el = document.getElementById(id); if(el) el.textContent = cc; });
+}
+function renderActivity(){
+  var list = document.getElementById('activityList');
+  if(!CHECKINS.length){ list.innerHTML = '<div class="act-item"><div class="act-dot"></div><div class="act-text" style="color:var(--text-sub)">暂无最近动态</div></div>'; return; }
+  list.innerHTML = CHECKINS.slice(0, 3).map(function(c){
+    return '<div class="act-item"><div class="act-dot"></div><div class="act-text">打卡了 <em>《'+c.recipe+'》</em></div><div class="act-time">'+c.date+'</div></div>';
+  }).join('');
+}
+function renderAll(){
+  syncCounts();
+  renderActivity();
+  renderFavorites();
+  renderCheckins();
+}
+
+// Update counts when adding new checkin
+var origSubmitCheckin = submitCheckin;
+submitCheckin = function(){
+  origSubmitCheckin();
+  syncCounts();
+  renderActivity();
+};
+
+// Keyboard shortcut: Enter to login
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Enter'){
+    var af = document.getElementById('authState');
+    if(af && af.style.display !== 'none') doLogin();
+  }
+});
+</script>
+</body>
+</html>
