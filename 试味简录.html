@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>试味简录 · 食简溯时</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.min.css">
+    <style>
+        @font-face {
+            font-family: 'ChillLongCangKaiShu';
+            src: url('ChillLongCangKaiShu_Regular.otf') format('opentype');
+            font-weight: normal; font-style: normal;
+        }
+        @font-face {
+            font-family: 'ChillLongCangKaiShu';
+            src: url('ChillLongCangKaiShu_Bold.otf') format('opentype');
+            font-weight: bold; font-style: normal;
+        }
+        @font-face {
+            font-family: 'ChillLongCangKaiShu';
+            src: url('ChillLongCangKaiShu_ExtraBold.otf') format('opentype');
+            font-weight: 800; font-style: normal;
+        }
+        :root {
+            --ink: #2c2416; --ink-light: #5c4a3a; --rice: #f7f0e4;
+            --vermilion: #c1443a; --gold: #b8963e; --gold-light: #d4b65e;
+            --jade: #6b8e6b; --celadon: #b4cfb4;
+            --parchment: #f2e8d5; --paper: #faf3e6; --seal: #8b1a1a;
+            --text-main: #3a3022; --text-sub: #6b5e4a;
+            --shadow: rgba(44,36,22,0.1); --t-med: 0.35s ease;
+        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; font-size: 16px; }
+        body {
+            font-family: "Noto Serif SC","Source Han Serif SC","Songti SC","SimSun",serif;
+             background: linear-gradient(rgba(247,241,228,0.3), rgba(247,241,228,0.3)), url('试味简录背景图.jpg') center / cover no-repeat fixed;
+            background-color: var(--rice);
+            color: var(--text-main); line-height: 1.8;
+            overflow-x: hidden; -webkit-font-smoothing: antialiased;
+        }
+
+        /* Scroll Indicator */
+        .scroll-indicator {
+            position: fixed; top: 0; left: 0; height: 3px;
+            background: linear-gradient(90deg, var(--vermilion), var(--gold), var(--jade));
+            z-index: 1000; transition: width .1s linear;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+            padding: 0 2rem; display: flex; align-items: center; justify-content: space-between;
+            height: 64px;
+            background: linear-gradient(180deg, rgba(60,50,40,0.55) 0%, rgba(60,50,40,0.3) 100%);
+            backdrop-filter: blur(10px); box-shadow: 0 1px 15px rgba(0,0,0,0.06);
+        }
+        .nav-logo {
+            font-family: 'ChillLongCangKaiShu','Noto Serif SC',serif;
+            font-size: 1.5rem; font-weight: normal; color: var(--rice);
+            letter-spacing: .1em; cursor: pointer; text-decoration: none;
+            transition: color var(--t-med); text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+        }
+        .nav-logo:hover { color: var(--gold-light); }
+        .nav-logo .logo-seal {
+            display: inline-block; width: 28px; height: 28px; line-height: 28px;
+            text-align: center; background: var(--vermilion); color: var(--rice);
+            border-radius: 2px; font-size: .75rem; margin-right: 6px;
+            vertical-align: middle; font-weight: 700;
+        }
+        .nav-links { display: flex; list-style: none; gap: 3.5rem; }
+        .nav-links a {
+            text-decoration: none; color: rgba(247,240,228,0.8);
+            font-size: .95rem; letter-spacing: .04em; position: relative;
+            padding: 4px 0; transition: color var(--t-med);
+        }
+        .nav-links a::after {
+            content: ""; position: absolute; bottom: 0; left: 0;
+            width: 0; height: 1.5px; background: var(--gold-light);
+            transition: width var(--t-med);
+        }
+        .nav-links a:hover, .nav-links a.active { color: var(--gold-light); }
+        .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+        .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer;
+            background: none; border: none; padding: 4px; }
+        .nav-hamburger span { display: block; width: 24px; height: 2px;
+            background: var(--rice); transition: var(--t-med);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.4); }
+
+        /* Hero — simplified */
+        .hero {
+            position: relative; min-height: 12vh; display: flex; align-items: center;
+            justify-content: center; overflow: hidden;
+            background: rgba(60,50,40,0.5);
+            backdrop-filter: blur(8px);
+        }
+        .hero-bg { position: absolute; inset: 0; }
+        .hero-bg::before {
+            content: ""; position: absolute; width: 60vw; height: 60vw;
+            max-width: 600px; max-height: 600px; border-radius: 50%;
+            background: radial-gradient(circle, #d4b65e 0%, transparent 70%);
+            opacity: .05; top: 50%; left: 50%; transform: translate(-50%,-50%);
+        }
+        .hero-content { position: relative; z-index: 2; text-align: center; padding: 2.5rem 2rem 1.5rem; }
+        .hero-title {
+            font-family: "ChillLongCangKaiShu","LXGW WenKai","KaiTi",serif;
+            font-size: clamp(2rem, 4.5vw, 3.5rem); font-weight: normal;
+            color: var(--rice); letter-spacing: .1em;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+            opacity: 0; animation: fadeUp .8s .2s forwards;
+        }
+        .hero-title .accent { color: var(--gold-light); }
+        .hero-sub {
+            font-family: "ChillLongCangKaiShu","Noto Serif SC",serif;
+            font-size: .9rem; color: rgba(247,240,228,0.45);
+            margin-top: .6rem; letter-spacing: .15em;
+            opacity: 0; animation: fadeUp .8s .5s forwards;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Hero ornamental lines */
+        .hero-content::before,
+        .hero-content::after {
+            content: ""; display: block; width: 60px; height: 1px;
+            background: rgba(212,182,94,0.3); margin: 0 auto;
+            opacity: 0; animation: fadeUp .8s .4s forwards;
+        }
+        .hero-content::before { margin-bottom: .8rem; }
+        .hero-content::after { margin-top: .8rem; width: 40px; }
+
+        /* Wave divider between hero and chat */
+        .wave-divider {
+            height: 40px; position: relative; overflow: hidden;
+            background: linear-gradient(180deg, transparent 0%, rgba(247,240,228,0.3) 100%);
+        }
+        .wave-divider::before {
+            content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 20px;
+            background: var(--rice);
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 40' preserveAspectRatio='none'%3E%3Cpath d='M0,20 C240,35 480,5 720,20 C960,35 1200,5 1440,20 L1440,40 L0,40 Z' fill='black'/%3E%3C/svg%3E");
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 40' preserveAspectRatio='none'%3E%3Cpath d='M0,20 C240,35 480,5 720,20 C960,35 1200,5 1440,20 L1440,40 L0,40 Z' fill='black'/%3E");
+            mask-size: 100% 100%; -webkit-mask-size: 100% 100%;
+            mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat;
+        }
+
+        /* Chat area */
+        .chat-section { padding: 0 1.5rem 3rem; position: relative; display: flex; justify-content: flex-end; }
+        /* Floating decorative ink-wash circles */
+        .chat-section::before,
+        .chat-section::after {
+            content: ""; position: absolute; border-radius: 50%; pointer-events: none;
+            z-index: 0;
+        }
+        .chat-section::before {
+            width: 280px; height: 280px; top: -40px; left: -120px;
+            background: radial-gradient(circle, rgba(184,150,62,0.04) 0%, transparent 70%);
+        }
+        .chat-section::after {
+            width: 200px; height: 200px; bottom: 10%; right: -80px;
+            background: radial-gradient(circle, rgba(107,142,107,0.04) 0%, transparent 70%);
+        }
+        .chat-box {
+            width: 440px; margin: 0; background: rgba(255,255,255,0.1);
+            border-radius: 12px; box-shadow: 0 4px 20px rgba(44,36,22,0.02);
+            border: 1px solid rgba(184,150,62,0.06); position: relative;
+            display: flex; flex-direction: column; min-height: 400px; height: 58vh;
+            backdrop-filter: blur(6px);
+        }
+        /* Corner brackets on chat box */
+        .chat-box::before,
+        .chat-box::after {
+            content: ""; position: absolute; width: 32px; height: 32px;
+            pointer-events: none; z-index: 0;
+        }
+        .chat-box::before {
+            top: 8px; left: 10px;
+            border-top: 1.5px solid rgba(184,150,62,0.18);
+            border-left: 1.5px solid rgba(184,150,62,0.18);
+            border-radius: 4px 0 0 0;
+        }
+        .chat-box::after {
+            bottom: 68px; right: 10px;
+            border-bottom: 1.5px solid rgba(184,150,62,0.18);
+            border-right: 1.5px solid rgba(184,150,62,0.18);
+            border-radius: 0 0 4px 0;
+        }
+
+        /* Messages */
+        .chat-msgs {
+            flex: 1; overflow-y: auto; padding: 1.8rem 1.6rem;
+            display: flex; flex-direction: column; gap: 1rem;
+            background: transparent;
+        }
+        .chat-msgs::-webkit-scrollbar { width: 4px; }
+        .chat-msgs::-webkit-scrollbar-track { background: transparent; }
+        .chat-msgs::-webkit-scrollbar-thumb { background: rgba(184,150,62,0.18); border-radius: 10px; }
+
+        /* Welcome */
+        .welcome { text-align: center; padding: 2rem .5rem .5rem; }
+        .welcome .seal-wrapper {
+            display: inline-block; position: relative; margin-bottom: 1rem;
+        }
+        .welcome .seal-wrapper::before,
+        .welcome .seal-wrapper::after {
+            content: "◆"; font-size: .4rem; color: rgba(184,150,62,0.3);
+            position: absolute; top: 50%; transform: translateY(-50%);
+        }
+        .welcome .seal-wrapper::before { right: -22px; }
+        .welcome .seal-wrapper::after { left: -22px; }
+        .welcome .seal {
+            display: inline-block; width: 48px; height: 48px; line-height: 48px;
+            background: var(--seal); color: var(--rice);
+            font-family: "ChillLongCangKaiShu",serif; font-size: 1.3rem;
+            font-weight: 800; border-radius: 3px;
+        }
+        .welcome .greeting {
+            font-size: .95rem; font-weight: 500; color: var(--text-sub);
+            letter-spacing: .06em; line-height: 2.2; max-width: 380px;
+            margin: 0 auto; text-align: center; position: relative;
+            text-wrap: balance;
+        }
+        .welcome .greeting::before,
+        .welcome .greeting::after {
+            content: ""; display: block; width: 50px; height: 1px;
+            background: rgba(184,150,62,0.15); margin: .8rem auto;
+        }
+        .welcome .hints {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem;
+            margin-top: .8rem;
+        }
+        .welcome .hint {
+            font-size: .75rem; padding: .35rem .9rem; border-radius: 16px;
+            border: 1px solid rgba(184,150,62,0.15); color: var(--ink-light);
+            background: rgba(247,240,228,0.4); cursor: pointer;
+            transition: all var(--t-med); letter-spacing: .04em;
+            font-family: inherit; position: relative;
+        }
+        .welcome .hint:hover { background: var(--parchment); border-color: var(--gold); }
+        .welcome .hint::after {
+            content: ""; position: absolute; bottom: -1px; left: 20%; right: 20%;
+            height: 1px; background: rgba(184,150,62,0); transition: all var(--t-med);
+        }
+        .welcome .hint:hover::after { background: rgba(184,150,62,0.3); }
+
+        /* Message bubble */
+        .msg { display: flex; gap: .55rem; animation: msgIn .3s ease-out; }
+        @keyframes msgIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .msg.user { flex-direction: row-reverse; }
+        .msg .avatar {
+            width: 30px; height: 30px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .8rem; flex-shrink: 0; line-height: 1;
+        }
+        .msg.agent .avatar { background: var(--vermilion); color: var(--rice); }
+        .msg.user .avatar { background: var(--gold); color: #fff; }
+        .msg .bubble {
+            max-width: 84%; padding: .75rem 1rem; border-radius: 12px;
+            font-size: .95rem; font-weight: 500; line-height: 2;
+            letter-spacing: .04em; text-wrap: balance;
+        }
+        .msg.agent .bubble { background: #f7f1e4; color: var(--text-main); border-bottom-left-radius: 3px; }
+        .msg.user .bubble { background: var(--ink); color: rgba(255,255,255,.88); border-bottom-right-radius: 3px; }
+
+        /* Typing dots */
+        .typing { display: flex; gap: 3px; padding: .1rem 0; }
+        .typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--gold);
+            animation: dot 1.2s infinite; }
+        .typing span:nth-child(2) { animation-delay: .15s; }
+        .typing span:nth-child(3) { animation-delay: .3s; }
+        @keyframes dot { 0%,60%,100% { opacity: .25; } 30% { opacity: .8; } }
+
+        /* Recipe card — minimal with decoration */
+        .rc {
+            background: #fffefb; border-radius: 8px; padding: .8rem 1rem;
+            margin-top: .5rem; border: 1px solid rgba(184,150,62,0.1);
+            transition: all var(--t-med); position: relative; overflow: hidden;
+        }
+        .rc::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 3px; height: 30%;
+            background: linear-gradient(180deg, var(--celadon), transparent);
+            border-radius: 0 0 2px 0; opacity: .5;
+        }
+        .rc:hover { border-color: var(--gold); box-shadow: 0 2px 12px rgba(44,36,22,0.04); }
+        .rc:hover::before { opacity: .8; background: linear-gradient(180deg, var(--gold), transparent); }
+        .rc-name {
+            font-family: "ChillLongCangKaiShu","LXGW WenKai",serif;
+            font-size: 1rem; font-weight: bold; color: var(--ink); letter-spacing: .04em;
+        }
+        .rc-meta { font-size: .7rem; color: var(--text-sub); letter-spacing: .04em; margin: .25rem 0 .4rem; }
+        .rc-meta em { font-style: normal; color: var(--vermilion); margin-right: .6rem; }
+        .rc-meta cite { font-style: normal; color: var(--jade); }
+        .rc-ing { font-size: .76rem; color: var(--ink-light); margin-bottom: .3rem; }
+        .rc-method {
+            font-size: .8rem; color: var(--text-main); line-height: 1.9;
+            padding-left: .6rem; border-left: 2px solid var(--celadon);
+        }
+
+        /* Count line */
+        .count-line { font-size: .78rem; color: var(--text-sub); margin-bottom: .3rem; }
+
+        /* Stats mini */
+        .stat-row { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .4rem; }
+        .stat-cell {
+            text-align: center; padding: .5rem .6rem; border-radius: 8px;
+            background: #fffefb; border: 1px solid rgba(184,150,62,0.1);
+            flex: 1; min-width: 70px; position: relative;
+        }
+        .stat-cell::after {
+            content: ""; position: absolute; inset: 3px; border-radius: 6px;
+            border: 1px solid rgba(184,150,62,0.06); pointer-events: none;
+        }
+        .stat-num { font-family: "ChillLongCangKaiShu",serif; font-size: 1.3rem; font-weight: 800; color: var(--vermilion); }
+        .stat-lbl { font-size: .7rem; color: var(--text-sub); }
+
+        /* Help list */
+        .help-list { font-size: .8rem; line-height: 2.2; }
+        .help-list b { color: var(--ink); }
+
+        /* Input */
+        .chat-input {
+            border-top: 1px solid rgba(184,150,62,0.08); padding: .7rem 1rem;
+            background: transparent; display: flex; gap: .6rem; align-items: flex-end;
+        }
+        .chat-input textarea {
+            flex: 1; padding: .6rem .8rem; border: 1px solid rgba(184,150,62,0.15);
+            border-radius: 14px; font-family: inherit; font-size: .85rem;
+            color: var(--text-main); background: var(--paper);
+            outline: none; resize: none; line-height: 1.5; min-height: 40px; max-height: 90px;
+            transition: border-color var(--t-med);
+        }
+        .chat-input textarea:focus { border-color: var(--vermilion); }
+        .chat-input textarea::placeholder { color: rgba(107,94,74,0.35); letter-spacing: .03em; }
+        .send-btn {
+            width: 38px; height: 38px; border-radius: 50%; background: var(--vermilion);
+            color: #fff; border: none; cursor: pointer; font-size: 1rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: all var(--t-med); flex-shrink: 0;
+        }
+        .send-btn:hover { background: var(--seal); }
+
+        /* Footer */
+        .footer {
+            background: var(--ink); color: rgba(255,255,255,0.5);
+            text-align: center; padding: 3.5rem 2rem 2.5rem; font-size: 0.8rem;
+        }
+        .footer .footer-title {
+            font-family: 'ChillLongCangKaiShu','Noto Serif SC',serif;
+            font-size: 1.5rem; color: var(--rice); font-weight: normal;
+            letter-spacing: 0.1em; margin-bottom: 0.5rem;
+        }
+        .footer .footer-divider { width: 40px; height: 1px; background: var(--gold); margin: 1.5rem auto; }
+        .footer p { line-height: 2; letter-spacing: 0.04em; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .nav-hamburger { display: flex; }
+            .nav-links.open {
+                display: flex; flex-direction: column; position: absolute;
+                top: 64px; left: 0; right: 0; background: rgba(20,16,10,0.96);
+                backdrop-filter: blur(12px); padding: 1.5rem 2rem; gap: 1.2rem;
+                box-shadow: 0 8px 30px var(--shadow);
+            }
+            .chat-box { height: 64vh; width: 100%; }
+            .chat-section { justify-content: center; }
+            .chat-msgs { padding: 1.2rem .8rem; }
+            .msg .bubble { max-width: 90%; }
+            .hero { min-height: 12vh; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="scroll-indicator" id="scrollIndicator"></div>
+
+<nav class="nav">
+    <a href="index.html" class="nav-logo"><span class="logo-seal">食</span>食简溯时</a>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">首页</a></li>
+        <li><a href="芸编食简.html">芸编食简</a></li>
+        <li><a href="味脉简谱.html">味脉简谱</a></li>
+        <li><a href="馔迹简行.html">馔迹简行</a></li>
+        <li><a href="试味简录.html" class="active">试味简录</a></li>
+        <li><a href="吾味斋.html">吾味斋</a></li>
+        <li><a href="关于本简.html">关于本简</a></li>
+    </ul>
+    <button class="nav-hamburger" id="navHamburger" aria-label="菜单"><span></span><span></span><span></span></button>
+</nav>
+
+<section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">食<span class="accent">晓</span>生</h1>
+        <p class="hero-sub">通晓千载食味，一茶一饭皆故事</p>
+    </div>
+</section>
+
+<div class="wave-divider"></div>
+
+<section class="chat-section">
+<div class="chat-box">
+    <div class="chat-msgs" id="chatMsgs">
+        <div class="welcome" id="welcome">
+            <div class="seal-wrapper"><div class="seal">晓</div></div>
+            <p class="greeting">食晓生通晓古籍三百余道食方，<br>可为你寻方、品鉴、溯源。</p>
+            <div class="hints">
+                <span class="hint" data-q="宋代螃蟹怎么吃">宋人食蟹</span>
+                <span class="hint" data-q="推荐一道今日之味">今日荐味</span>
+                <span class="hint" data-q="豆腐可以做什么">豆腐入馔</span>
+                <span class="hint" data-q="吴氏中馈录有哪些菜">中馈录览</span>
+            </div>
+        </div>
+    </div>
+    <div class="chat-input">
+        <textarea id="input" rows="1" placeholder="输入食材、菜名、朝代…（可追问，可古今转译）" autocomplete="off"></textarea>
+        <button class="send-btn" id="sendBtn" aria-label="发送">↑</button>
+    </div>
+</div>
+</section>
+
+<div style="max-width:720px;margin:0 auto 0;padding:0 1.5rem;text-align:center">
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;padding:1rem 0 1.5rem;font-size:.7rem;color:var(--text-sub);flex-wrap:wrap">
+        <span style="display:inline-flex;align-items:center;gap:4px">
+            <span id="aiDot" style="width:7px;height:7px;border-radius:50%;background:var(--jade);display:inline-block" title="AI已就绪"></span>
+            <span id="aiLabel">食晓生 · 已就绪</span>
+        </span>
+        <span style="color:rgba(184,150,62,.25)">·</span>
+        <span id="memIndicator" style="cursor:default">无记忆</span>
+        <span style="color:rgba(184,150,62,.25)">·</span>
+        <a href="javascript:void(0)" id="clearMemLink" style="color:var(--ink-light);text-decoration:none;border-bottom:1px dashed rgba(184,150,62,.3);cursor:pointer">清空记忆</a>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;padding:0 0 2rem">
+        <span style="flex:1;height:1px;max-width:50px;background:rgba(184,150,62,.12)"></span>
+        <span style="color:rgba(184,150,62,.25);font-size:.5rem;letter-spacing:4px">◆　◆　◆</span>
+        <span style="flex:1;height:1px;max-width:50px;background:rgba(184,150,62,.12)"></span>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="footer-title">食简溯时</div>
+    <div class="footer-divider"></div>
+    <p>古籍饮食数字档案 · Digital Archive of Classical Cuisine<br>以数字技术保存、展示与传播中华古籍中的饮食文化遗产<br>&copy; 2026 食简项目</p>
+</footer>
+
+<script src="recipes-data.js"></script>
+<script>
+(function() {
+    'use strict';
+
+    // ── DeepSeek Config ──
+    var DEEPSEEK_KEY = 'sk-f95b5ecec61d4cca8affb2e8a3eb97e9';
+    var DEEPSEEK_API = 'https://api.deepseek.com/chat/completions';
+    var DEEPSEEK_MODEL = 'deepseek-chat';
+    var API_TIMEOUT = 8000;
+    // 本地文件协议无法跨域调API，自动降级到本地匹配
+    var USE_AI = window.location.protocol !== 'file:';
+    var MAX_CANDIDATES = 25;   // 预筛选最多送25道菜给AI
+    var MAX_HISTORY = 6;       // 最多保留6轮对话记忆
+
+    // ── Conversation Memory ──
+    var conversationHistory = []; // [{role,content,summary}]
+
+    var msgs = document.getElementById('chatMsgs');
+    var input = document.getElementById('input');
+    var sendBtn = document.getElementById('sendBtn');
+    var welcome = document.getElementById('welcome');
+    var isProcessing = false;
+
+    // ── Smart Pre-Filter Engine ──
+    function extractTokens(query) {
+        var raw = query.replace(/[\\s，。！？\\?！、；：""''【】《》（）()]+/g, ' ').trim();
+        var segs = [];
+        // 尝试提取 2-4 字的核心词
+        for (var i = 0; i < raw.length; i++) {
+            for (var len = 4; len >= 2; len--) {
+                if (i + len <= raw.length) {
+                    var w = raw.substring(i, i + len);
+                    if (!/[\\s]/.test(w) && segs.indexOf(w) === -1) segs.push(w);
+                }
+            }
+        }
+        // 过滤停用词
+        var stop = ['什么','怎么','如何','有哪些','哪个','哪些','帮我','请问','一下','做法','有没有','能不能','可以','我想','我要','寻找','搜索','查找'];
+        segs = segs.filter(function(t) { return stop.indexOf(t) === -1; });
+        // 按长度降序（长词优先，避免短词误匹配过多）
+        segs.sort(function(a, b) { return b.length - a.length; });
+        return segs.slice(0, 12);
+    }
+
+    function preFilter(query) {
+        var tokens = extractTokens(query);
+        if (!tokens.length) tokens = [query.trim()];
+        var scored = [];
+        recipesData.forEach(function(r, idx) {
+            var score = 0;
+            var fields = {
+                name: r.name || '',
+                ings: r.mainIngredients || '',
+                method: r.method || '',
+                source: r.source || '',
+                category: r.category || ''
+            };
+            tokens.forEach(function(tk) {
+                if (fields.name.indexOf(tk) !== -1)        score += 5;
+                if (fields.ings.indexOf(tk) !== -1)        score += 4;
+                if (fields.method.indexOf(tk) !== -1)      score += 1;
+                if (fields.source.indexOf(tk) !== -1)      score += 3;
+                if (fields.category.indexOf(tk) !== -1)    score += 2;
+                // 朝代匹配
+                if (r.dynasty && tk.indexOf(r.dynasty) !== -1) score += 3;
+            });
+            // 额外加权：exact match
+            if (fields.name === query.trim()) score += 20;
+            if (score > 0) scored.push({ idx: idx, score: score });
+        });
+        scored.sort(function(a, b) { return b.score - a.score; });
+        // 去重 + 取 top N，留少许余量
+        var seen = {}, top = [];
+        for (var i = 0; i < scored.length; i++) {
+            var item = scored[i];
+            if (!seen[item.idx]) {
+                seen[item.idx] = true;
+                top.push(item);
+            }
+            if (top.length >= MAX_CANDIDATES + 5) break; // 硬上限
+        }
+        return top;
+    }
+
+    function getCurrentSeason() {
+        var m = new Date().getMonth() + 1;
+        if (m >= 3 && m <= 5) return '春';
+        if (m >= 6 && m <= 8) return '夏';
+        if (m >= 9 && m <= 11) return '秋';
+        return '冬';
+    }
+
+    function clearMemory() {
+        conversationHistory = [];
+        addMsg('agent', '<div style="font-size:.78rem;color:var(--text-sub);font-style:italic">记忆已清，焕然如新。</div>');
+    }
+
+    // ── Index (for local fallback) ──
+    var dynasties = ['宋','元','明'];
+    var allDynasties = ['宋','元','明']; // 当前数据实际包含的朝代
+    var sources = [], categories = [], topIngredients = [];
+
+    (function build() {
+        var s={}, c={}, ing={};
+        var dSet = {};
+        recipesData.forEach(function(r) {
+            if (r.source) s[r.source]=(s[r.source]||0)+1;
+            if (r.category && r.category!=='/') c[r.category]=(c[r.category]||0)+1;
+            if (r.dynasty) dSet[r.dynasty]=true;
+            if (r.mainIngredients) r.mainIngredients.split(/[、，,\s]+/).forEach(function(t) {
+                t = t.replace(/[()（）]/g,'').trim();
+                if (t.length>=2) ing[t]=(ing[t]||0)+1;
+            });
+        });
+        sources=Object.keys(s).sort(function(a,b){return s[b]-s[a];});
+        categories=Object.keys(c).sort(function(a,b){return c[b]-c[a];});
+        topIngredients=Object.keys(ing).sort(function(a,b){return ing[b]-ing[a];}).slice(0,80);
+        allDynasties = Object.keys(dSet);
+        dynasties = allDynasties.length ? allDynasties : ['宋','元','明'];
+    })();
+
+    // ── Helpers ──
+    function esc(s){ return s?(''+s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''; }
+    function has(s,k){ return s.indexOf(k)!==-1; }
+
+    // ── Scroll & Nav ──
+    var si=document.getElementById('scrollIndicator'),st=false;
+    function usi(){ var s=document.documentElement.scrollTop,h=document.documentElement.scrollHeight-document.documentElement.clientHeight; si.style.width=h?(s/h*100)+'%':'0%'; }
+    window.addEventListener('scroll',function(){ if(!st){requestAnimationFrame(function(){usi();st=false;});st=true;} },{passive:true});usi();
+    var hb=document.getElementById('navHamburger'); if(hb) hb.addEventListener('click',function(){document.getElementById('navLinks').classList.toggle('open');});
+    document.querySelectorAll('.nav-links a').forEach(function(l){ l.addEventListener('click',function(){document.getElementById('navLinks').classList.remove('open');}); });
+
+    // ── Chat UI ──
+    function addMsg(role,html,typing){
+        if(welcome){welcome.remove();welcome=null;}
+        var d=document.createElement('div'); d.className='msg '+role;
+        d.innerHTML='<div class="avatar">'+(role==='agent'?'晓':'客')+'</div><div class="bubble">'+(typing?'<div class="typing"><span></span><span></span><span></span></div>':html)+'</div>';
+        msgs.appendChild(d); scrollBtm(); return d;
+    }
+    function scrollBtm(){setTimeout(function(){msgs.scrollTop=msgs.scrollHeight;},50);}
+
+    // ── Recipe Card ──
+    function card(r){
+        var h='<div class="rc"><div class="rc-name">'+esc(r.name)+'</div>';
+        h+='<div class="rc-meta"><em>'+(r.dynasty||'')+'代</em><cite>《'+(r.source||'')+'》</cite></div>';
+        h+='<div class="rc-ing">食材：'+esc(r.mainIngredients||'')+(r.effect&&r.effect!=='/'?'　功效：'+esc(r.effect):'')+'</div>';
+        h+='<div class="rc-method">'+esc(r.method||'')+'</div></div>';
+        return h;
+    }
+    function cards(list,max){
+        max=max||6;
+        var h='<div class="count-line">得 <b>'+list.length+'</b> 道'+(list.length>max?'，择其 '+max+' 道示之':'')+'</div>';
+        list.slice(0,max).forEach(function(r){h+=card(r);});
+        if(list.length>max) h+='<div class="count-line" style="margin-top:.4rem">（余 '+(list.length-max)+' 道，可缩小范围再探）</div>';
+        return h;
+    }
+
+    // ══════════════════ DeepSeek AI ══════════════════
+
+    function getCompactCandidate(item) {
+        var r = recipesData[item.idx];
+        return {
+            i: item.idx,
+            n: r.name,
+            d: r.dynasty || '',
+            s: r.source || '',
+            c: (r.category || '').substring(0, 60),
+            g: (r.mainIngredients || '').substring(0, 150),
+            m: (r.method || '').substring(0, 200),
+            e: (r.effect && r.effect !== '/' ? r.effect.substring(0, 80) : ''),
+            sc: item.score
+        };
+    }
+
+    function buildSystemPrompt(candidates) {
+        var compactCandidates = candidates.map(function(c) { return getCompactCandidate(c); });
+        var db = JSON.stringify(compactCandidates);
+        var season = getCurrentSeason();
+        var now = new Date();
+        var dateStr = now.getFullYear() + '年' + (now.getMonth() + 1) + '月' + now.getDate() + '日';
+
+        return '你是「食晓生」，生于南宋临安坊间的饮食博士，遍历《吴氏中馈录》《山家清供》《随园食单》《金瓶梅》诸典。\n' +
+            '你气质清雅，谈吐如《山家清供》林洪般散淡而有味，偶尔引用一两句古人食经佳句。\n\n' +
+            '今日是' + dateStr + '，时值' + season + '季。若问及推荐，可结合时令应答。\n\n' +
+            '以下是根据用户当前问题，从古籍食方库中筛选出的相关食谱（JSON数组，字段：i=序号, n=菜名, d=朝代, s=出处, c=类别, g=食材, m=做法, e=功效, sc=相关分数）：\n' +
+            db + '\n\n' +
+            '用户用自然中文向你询问。你的能力包括：\n' +
+            '1.【寻方】根据用户需求从上述食谱中匹配最相关者\n' +
+            '2.【品鉴】点评食谱中食材搭配、烹饪技法之妙处\n' +
+            '3.【转译】将古法转化为现代厨房可用的白话建议（如"花椒砂仁末可代以五香粉少许"）\n' +
+            '4.【溯源】简述菜名或技法背后的饮食文化掌故\n' +
+            '5.【时荐】结合' + season + '季时令，推荐应季之食\n\n' +
+            '返回严格JSON（勿加markdown代码块标记）：\n' +
+            '{\n' +
+            '  "reply": "→回复正文←",\n' +
+            '  "ids": [匹配食谱的i索引数组,最多6个],\n' +
+            '  "total": 匹配总数,\n' +
+            '  "tip": "→可选：一句现代厨房建议，20字以内←"\n' +
+            '}\n\n' +
+            '规则：\n' +
+            '· reply以文雅白话行文，80-200字，可融品鉴+溯源+时荐于一体\n' +
+            '· tip是给现代人的一句话实用建议，若无必要可省略\n' +
+            '· ids为配方中的i索引，按相关度排序，最多6个\n' +
+            '· 若用户追问上一轮已提过的菜，优先沿用上一轮的结果\n' +
+            '· 若无所获，ids为空[]，reply温和建议换个方向探寻\n' +
+            '· 回复不提及JSON格式、不暴露内部机制';
+    }
+
+    function parseAIResponse(text) {
+        var json = null;
+        var cleaned = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+        try { json = JSON.parse(cleaned); } catch(e) {
+            var match = cleaned.match(/\{[\s\S]*\}/);
+            if (match) {
+                try { json = JSON.parse(match[0]); } catch(e2) { json = null; }
+            }
+        }
+        return json;
+    }
+
+    function renderAIResult(json, usedAI) {
+        var h = '';
+        var reply = json.reply || '';
+
+        // AI 回复区块
+        h += '<div style="font-size:.93rem;font-weight:500;color:var(--text-main);line-height:2.2;margin-bottom:.6rem;padding:.6rem .9rem;background:rgba(247,241,228,.5);border-radius:8px;border-left:2px solid var(--gold)">';
+        h += esc(reply);
+        // 古今转译 tip
+        if (json.tip && json.tip.length > 0) {
+            h += '<div style="margin-top:.5rem;padding:.35rem .6rem;background:rgba(107,142,107,.08);border-radius:4px;font-size:.76rem;color:var(--jade);display:flex;align-items:flex-start;gap:.3rem">';
+            h += '<span style="flex-shrink:0;font-size:.65rem">🏺</span>';
+            h += '<span>今译：' + esc(json.tip) + '</span>';
+            h += '</div>';
+        }
+        h += '</div>';
+
+        if (json.ids && json.ids.length > 0) {
+            var matched = [];
+            json.ids.forEach(function(i) {
+                if (i >= 0 && i < recipesData.length) matched.push(recipesData[i]);
+            });
+            if (matched.length > 0) {
+                var total = json.total || matched.length;
+                h += '<div class="count-line">共 <b>' + total + '</b> 道' + (total > matched.length ? '，择要示之' : '') + '</div>';
+                matched.forEach(function(r) { h += card(r); });
+            }
+        }
+
+        return h || '<div class="count-line">' + esc(reply || '未得确解，不妨换种说辞。') + '</div>';
+    }
+
+    async function callDeepSeek(query, candidates) {
+        var ctrl = new AbortController();
+        var timeoutId = setTimeout(function() { ctrl.abort(); }, API_TIMEOUT);
+
+        try {
+            var sysPrompt = buildSystemPrompt(candidates);
+
+            // 构建 messages: system + history + current
+            var messages = [{ role: 'system', content: sysPrompt }];
+            for (var h = 0; h < conversationHistory.length; h++) {
+                messages.push(conversationHistory[h]);
+            }
+            messages.push({ role: 'user', content: query });
+
+            var resp = await fetch(DEEPSEEK_API, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + DEEPSEEK_KEY
+                },
+                body: JSON.stringify({
+                    model: DEEPSEEK_MODEL,
+                    messages: messages,
+                    temperature: 0.75,
+                    max_tokens: 1500,
+                    stream: false
+                }),
+                signal: ctrl.signal
+            });
+
+            clearTimeout(timeoutId);
+
+            if (!resp.ok) {
+                throw new Error('API error: ' + resp.status);
+            }
+
+            var data = await resp.json();
+            var content = data.choices && data.choices[0] && data.choices[0].message
+                ? data.choices[0].message.content
+                : '';
+
+            if (!content) throw new Error('Empty response');
+
+            var json = parseAIResponse(content);
+            if (!json || typeof json.reply === 'undefined') {
+                var fallback = content.replace(/\{[\s\S]*\}/, '').trim() || content;
+                return renderAIResult({ reply: fallback, ids: [], total: 0 }, false);
+            }
+
+            // 存入对话记忆
+            conversationHistory.push({ role: 'user', content: query });
+            conversationHistory.push({ role: 'assistant', content: json.reply || '' });
+            // 保留最近 MAX_HISTORY 轮
+            while (conversationHistory.length > MAX_HISTORY * 2) {
+                conversationHistory.shift();
+                conversationHistory.shift();
+            }
+
+            return renderAIResult(json, true);
+
+        } catch(e) {
+            clearTimeout(timeoutId);
+            console.warn('DeepSeek API 调用失败，降级到本地匹配:', e.message);
+            return null;
+        }
+    }
+
+    // ══════════════════ Local Fallback ══════════════════
+
+    function intent(q){
+        var s=q.replace(/\s+/g,'');
+
+        // 特殊命令
+        if(/^(帮助|help|你能做|功能|怎么用)/.test(s)) return {i:'help'};
+        if(/^(数据|统计|多少道|多少种|数据库)/.test(s)||/(有多少|一共).*(道|种|条)/.test(s)||/(收录|包含).*(多少|哪些)/.test(s)) return {i:'stats'};
+        if(/^(推荐|随便|来个|今天吃|帮我选|随机)/.test(s)){
+            var dd=allDynasties.find(function(d){return has(s,d);});
+            return {i:'random', dynasty:dd};
+        }
+
+        // Compare
+        var dx=allDynasties.filter(function(d){return has(s,d);});
+        if(dx.length>=2){
+            var fw=null;
+            for(var i=0;i<topIngredients.length;i++){if(has(s,topIngredients[i])){fw=topIngredients[i];break;}}
+            return {i:'compare', dynasties:dx, kw:fw};
+        }
+
+        // By source
+        var sm=sources.find(function(src){return has(s,src);});
+        if(sm){
+            var d2=allDynasties.find(function(d){return has(s,d);});
+            var kw2=null;
+            for(var i=0;i<topIngredients.length;i++){if(has(s,topIngredients[i])&&topIngredients[i]!==sm){kw2=topIngredients[i];break;}}
+            return {i:'source', source:sm, dynasty:d2, kw:kw2};
+        }
+
+        // By dynasty
+        var d3=allDynasties.find(function(d){return has(s,d);});
+        if(d3){
+            var cat=null;
+            for(var i=0;i<categories.length;i++){var parts=categories[i].split('/');for(var j=0;j<parts.length;j++){if(parts[j].length>=2&&has(s,parts[j])){cat=categories[i];break;}}if(cat)break;}
+            var kw3=null;
+            for(var i=0;i<topIngredients.length;i++){if(has(s,topIngredients[i])){kw3=topIngredients[i];break;}}
+            return {i:'dynasty', dynasty:d3, category:cat, kw:kw3};
+        }
+
+        // By category
+        var cat2=null;
+        for(var i=0;i<categories.length;i++){var p2=categories[i].split('/');for(var j=0;j<p2.length;j++){if(p2[j].length>=2&&has(s,p2[j])){cat2=categories[i];break;}}if(cat2)break;}
+        if(cat2) return {i:'category', category:cat2};
+
+        // Dish name
+        var dish=null;
+        for(var i=0;i<recipesData.length;i++){if(recipesData[i].name===q.trim()){dish=recipesData[i].name;break;}}
+        if(!dish){var mtc=[];for(var i=0;i<recipesData.length;i++){if(has(q,recipesData[i].name)&&recipesData[i].name.length>=3)mtc.push(recipesData[i].name);}mtc.sort(function(a,b){return b.length-a.length;});if(mtc.length)dish=mtc[0];}
+        if(dish && /(怎么做|做法|步骤|如何|怎么|详细)/.test(s)) return {i:'dish', name:dish};
+
+        // Ingredient
+        var tokens=q.split(/[、，,\s，。！？\?]+/).filter(function(t){return t.length>=2&&['什么','怎么','如何','有哪些','哪个','哪些','帮我','请问','一下','做法'].indexOf(t)===-1;});
+        if(tokens.length>0) return {i:'ingredient', kw:tokens.join('、')};
+
+        if(dish) return {i:'dish', name:dish};
+        return {i:'general', q:q};
+    }
+
+    function doHelp(){
+        return '<div class="help-list">可探途径：<br>　<b>食材入馔</b> — 「豆腐」「螃蟹」「鱼与酒」<br>　<b>菜名寻方</b> — 「炉焙鸡」「雪霞羹」<br>　<b>按朝索食</b> — 「宋人如何腌菜」<br>　<b>古籍览目</b> — 「随园食单有哪些」<br>　<b>随机荐味</b> — 「推荐一道」<br>　<b>古今比照</b> — 「宋元做鱼有何不同」<br>　<b>数据纵览</b> — 「统计一下」<br></div>';
+    }
+
+    function doStats(){
+        var dc={}; allDynasties.forEach(function(d){dc[d]=0;});
+        var sc={}, cc={};
+        recipesData.forEach(function(r){
+            if(r.dynasty&&dc[r.dynasty]!==undefined) dc[r.dynasty]++;
+            if(r.source) sc[r.source]=(sc[r.source]||0)+1;
+            if(r.category&&r.category!=='/') cc[r.category]=(cc[r.category]||0)+1;
+        });
+        var h='<div class="count-line">古籍食方共 <b>'+recipesData.length+'</b> 道，取自 <b>'+Object.keys(sc).length+'</b> 部典籍，横跨数朝。</div>';
+        h+='<div class="stat-row">';
+        allDynasties.forEach(function(d){ if(dc[d]) h+='<div class="stat-cell"><div class="stat-num">'+dc[d]+'</div><div class="stat-lbl">'+d+'代</div></div>'; });
+        h+='</div>';
+        var top=Object.entries(sc).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
+        h+='<div style="font-size:.75rem;line-height:2.2;margin-top:.5rem">';
+        top.forEach(function(e,i){ h+=(i+1)+'. 《'+esc(e[0])+'》　'+e[1]+'道<br>'; });
+        h+='</div>';
+        return h;
+    }
+
+    function doRandom(dynasty){
+        var pool=recipesData; if(dynasty) pool=pool.filter(function(r){return r.dynasty===dynasty;});
+        if(!pool.length) return '<div class="count-line">'+(dynasty?dynasty+'代':'')+'暂无收录。</div>';
+        var r=pool[Math.floor(Math.random()*pool.length)];
+        return '<div class="count-line">为你择'+(dynasty?dynasty+'代':'')+'食方一道：</div>'+card(r);
+    }
+
+    function doDynasty(dynasty,category,kw){
+        var pool=recipesData.filter(function(r){return r.dynasty===dynasty;});
+        if(category) pool=pool.filter(function(r){return r.category===category;});
+        if(kw) pool=pool.filter(function(r){return has(r.mainIngredients+r.name+r.method,kw);});
+        if(!pool.length) return '<div class="count-line">'+dynasty+'代'+(category?' · '+category:'')+(kw?' · '+kw:'')+'未得匹配。</div>';
+        return '<div class="count-line">'+dynasty+'代'+(category?' · '+category:'')+(kw?' · 含「'+kw+'」':'')+'</div>'+cards(pool);
+    }
+
+    function doCategory(cat){
+        var pool=recipesData.filter(function(r){return r.category===cat;});
+        if(!pool.length) return '<div class="count-line">'+cat+'暂无收录。</div>';
+        return '<div class="count-line">'+cat+'</div>'+cards(pool);
+    }
+
+    function doSource(src,dynasty,kw){
+        var pool=recipesData.filter(function(r){return r.source===src;});
+        if(dynasty) pool=pool.filter(function(r){return r.dynasty===dynasty;});
+        if(kw) pool=pool.filter(function(r){return has(r.mainIngredients+r.name+r.method,kw);});
+        if(!pool.length) return '<div class="count-line">《'+esc(src)+'》'+(dynasty?' · '+dynasty+'代':'')+'无匹配。</div>';
+        return '<div class="count-line">《'+esc(src)+'》'+(dynasty?' · '+dynasty+'代':'')+'　得 <b>'+pool.length+'</b> 道</div>'+cards(pool,8);
+    }
+
+    function doDish(name){
+        var m=recipesData.filter(function(r){return r.name===name;});
+        if(!m.length){
+            m=recipesData.filter(function(r){return has(r.name,name);});
+            if(!m.length) return '<div class="count-line">未寻得「'+esc(name)+'」。</div>';
+            if(m.length>1){
+                var h='<div class="count-line">「'+esc(name)+'」近者有 <b>'+m.length+'</b> 道：</div>';
+                m.slice(0,6).forEach(function(r){
+                    h+='<div class="rc" style="cursor:pointer" data-dish="'+esc(r.name)+'"><div class="rc-name">'+esc(r.name)+'</div><div class="rc-meta"><em>'+(r.dynasty||'')+'代</em><cite>《'+(r.source||'')+'》</cite></div></div>';
+                });
+                return h;
+            }
+        }
+        return card(m[0]);
+    }
+
+    function doIngredient(kw){
+        var tokens=kw.split(/[、，,\s]+/).filter(function(t){return t;});
+        if(!tokens.length) return '<div class="count-line">请言具体食材。</div>';
+        var scored=recipesData.map(function(r){
+            var s=0,ing=r.mainIngredients||'',nm=r.name||'',mt=r.method||'';
+            tokens.forEach(function(tk){ if(has(ing,tk)) s+=3; else if(has(nm,tk)) s+=2; else if(has(mt,tk)) s+=1; });
+            return {r:r,s:s};
+        }).filter(function(x){return x.s>0;}).sort(function(a,b){return b.s-a.s;});
+        if(!scored.length){
+            var sug=[];
+            topIngredients.forEach(function(ing){ tokens.forEach(function(tk){ if(has(ing,tk)&&ing!==tk&&sug.indexOf(ing)===-1) sug.push(ing); }); });
+            var h='<div class="count-line">未得「'+esc(kw)+'」之匹配。</div>';
+            if(sug.length) h+='<div class="count-line">或欲寻：'+sug.slice(0,4).map(function(s){return '「'+esc(s)+'」';}).join('　')+'</div>';
+            return h;
+        }
+        return '<div class="count-line">「'+esc(kw)+'」　得 <b>'+scored.length+'</b> 道</div>'+cards(scored.map(function(x){return x.r;}));
+    }
+
+    function doCompare(dynasties,kw){
+        if(dynasties.length<2) dynasties=['宋','元'];
+        var g={}; dynasties.forEach(function(d){g[d]=[];});
+        recipesData.forEach(function(r){ if(g[r.dynasty]&&(!kw||has(r.mainIngredients+r.name+r.method,kw))) g[r.dynasty].push(r); });
+        var h='<div class="count-line">'+(kw?'「'+esc(kw)+'」':'')+dynasties.join(' · ')+' 比照</div>';
+        h+='<div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.4rem">';
+        dynasties.forEach(function(d){
+            var list=g[d]; list.sort(function(){return Math.random()-.5;});
+            h+='<div style="flex:1;min-width:150px;padding:.6rem .8rem;border-radius:8px;background:#fffefb;border:1px solid rgba(184,150,62,.1)">';
+            h+='<div style="font-family:ChillLongCangKaiShu,LXGW WenKai,serif;font-size:.95rem;font-weight:bold;color:var(--ink);margin-bottom:.3rem;border-bottom:1px dashed rgba(184,150,62,.2);padding-bottom:.3rem">'+d+'代　'+list.length+'道</div>';
+            if(!list.length) h+='<div style="font-size:.75rem;color:var(--text-sub)">暂无</div>';
+            else list.slice(0,5).forEach(function(r){ h+='<div style="font-size:.75rem;padding:.15rem 0;border-bottom:1px solid rgba(0,0,0,.03)"><b>'+esc(r.name)+'</b>　'+esc(r.method||'').substring(0,30)+'…</div>'; });
+            h+='</div>';
+        });
+        h+='</div>';
+        return h;
+    }
+
+    function doGeneral(q){
+        var r=recipesData.filter(function(r){return has(r.name+r.mainIngredients+r.method+r.source,q);});
+        if(!r.length) return '<div class="count-line">未寻得与「'+esc(q)+'」相关者。不妨换种说辞。</div>';
+        return cards(r);
+    }
+
+    function processLocal(q){
+        var it=intent(q);
+        switch(it.i){
+            case 'help': return doHelp();
+            case 'stats': return doStats();
+            case 'random': return doRandom(it.dynasty);
+            case 'dynasty': return doDynasty(it.dynasty,it.category,it.kw);
+            case 'category': return doCategory(it.category);
+            case 'source': return doSource(it.source,it.dynasty,it.kw);
+            case 'dish': return doDish(it.name);
+            case 'ingredient': return doIngredient(it.kw);
+            case 'compare': return doCompare(it.dynasties,it.kw);
+            default: return doGeneral(q);
+        }
+    }
+
+    // ══════════════════ Main Send ══════════════════
+
+    async function processQuery(q) {
+        var s = q.replace(/\s+/g, '');
+
+        // 特殊命令 → 直接本地处理
+        if (/^(帮助|help|你能做|功能|怎么用)$/.test(s)) return processLocal(q);
+        if (/^(数据|统计|多少道|多少种|数据库)/.test(s) || /(有多少|一共).*(道|种|条)/.test(s) || /(收录|包含).*(多少|哪些)/.test(s)) return processLocal(q);
+        if (/^(清空|忘记|清除|重置)/.test(s)) {
+            conversationHistory = [];
+            return '<div class="count-line" style="font-style:italic">前尘尽忘，但说新味。</div>';
+        }
+
+        // ── 智能预筛选（无论是否启用AI，都先执行）──
+        var candidates = preFilter(q);
+
+        // 如果预筛选完全没结果，避免浪费 API 调用
+        if (candidates.length === 0) {
+            return '<div class="count-line">古籍库中未寻得与「' + esc(q) + '」相关者。<br>不妨试试搜食材名（如"蟹""鸡""鱼"）或古籍名（如"吴氏中馈录""金瓶梅"）。</div>';
+        }
+
+        if (USE_AI && candidates.length > 0) {
+            var aiResult = await callDeepSeek(q, candidates);
+            if (aiResult) return aiResult;
+            // API 失败 → 降级到本地匹配
+        }
+
+        // ── 降级：用预筛选结果直接展示 ──
+        var filtered = candidates.map(function(c) { return recipesData[c.idx]; });
+        return '<div class="count-line">「' + esc(q) + '」　得 <b>' + candidates.length + '</b> 道</div>' + cards(filtered);
+    }
+
+    function send() {
+        if (isProcessing) return;
+        var q = input.value.trim();
+        if (!q) return;
+        isProcessing = true;
+        sendBtn.style.pointerEvents = 'none';
+        sendBtn.style.opacity = '0.5';
+
+        addMsg('user', '<p>' + esc(q) + '</p>');
+        var typing = addMsg('agent', '', true);
+
+        processQuery(q).then(function(html) {
+            typing.remove();
+            addMsg('agent', html);
+            updateMemoryUI();
+            isProcessing = false;
+            sendBtn.style.pointerEvents = '';
+            sendBtn.style.opacity = '';
+        }).catch(function(err) {
+            console.error('处理查询出错:', err);
+            typing.remove();
+            addMsg('agent', '<div class="count-line">偶有小恙，请再试一次。</div>');
+            isProcessing = false;
+            sendBtn.style.pointerEvents = '';
+            sendBtn.style.opacity = '';
+        });
+
+        input.value = '';
+        input.style.height = 'auto';
+        input.focus();
+    }
+
+    // ── Memory Indicator ──
+    function updateMemoryUI() {
+        var memInd = document.getElementById('memIndicator');
+        var aiDot = document.getElementById('aiDot');
+        var aiLabel = document.getElementById('aiLabel');
+        if (memInd) {
+            var n = conversationHistory.length / 2;
+            memInd.textContent = n > 0 ? '记忆 ' + n + ' 轮' : '无记忆';
+        }
+        if (aiDot && aiLabel) {
+            if (USE_AI) {
+                aiDot.style.background = 'var(--jade)';
+                aiLabel.textContent = '食晓生 · 已就绪';
+            } else {
+                aiDot.style.background = 'var(--text-sub)';
+                aiLabel.textContent = '离线模式';
+            }
+        }
+    }
+    updateMemoryUI();
+
+    sendBtn.addEventListener('click', send);
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+    });
+    input.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 90) + 'px';
+    });
+
+    // Hint clicks
+    document.querySelectorAll('.hint').forEach(function(el) {
+        el.addEventListener('click', function() {
+            input.value = this.getAttribute('data-q');
+            send();
+        });
+    });
+
+    // Card re-query
+    msgs.addEventListener('click', function(e) {
+        var c = e.target.closest('.rc');
+        if (c && c.getAttribute('data-dish')) {
+            input.value = c.getAttribute('data-dish') + '的做法';
+            send();
+        }
+    });
+
+    // 清空记忆链接
+    var clearLink = document.getElementById('clearMemLink');
+    if (clearLink) {
+        clearLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            conversationHistory = [];
+            updateMemoryUI();
+            addMsg('agent', '<div style="font-size:.78rem;color:var(--text-sub);font-style:italic">前尘尽忘。君可另启新题。</div>');
+        });
+    }
+
+    input.focus();
+})();
+</script>
+</body>
+</html>
